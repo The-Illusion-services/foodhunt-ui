@@ -1,0 +1,214 @@
+# Project Structure
+📦 food_delivery_app/
+├── 📂 lib/
+│   ├── 📂 core/
+│   │   ├── 📂 config/
+│   │   │   ├── 📄 app_config.dart      # App-wide configuration
+│   │   │   └── 📄 env_config.dart      # Environment variables
+│   │   ├── 📂 constants/
+│   │   │   ├── 📄 api_paths.dart       # API endpoints
+│   │   │   ├── 📄 app_constants.dart   # App-wide constants
+│   │   │   └── 📄 asset_paths.dart     # Asset paths
+│   │   ├── 📂 extensions/
+│   │   │   ├── 📄 context_extensions.dart
+│   │   │   └── 📄 string_extensions.dart
+│   │   ├── 📂 theme/
+│   │   │   ├── 📄 app_theme.dart       # Theme configuration
+│   │   │   └── 📄 app_colors.dart      # Color constants
+│   │   ├── 📂 utils/
+│   │   │   ├── 📄 validators.dart      # Form validators
+│   │   │   └── 📄 formatter.dart       # Data formatters
+│   │   └── 📂 widgets/
+│   │       ├── 📄 custom_button.dart
+│   │       └── 📄 custom_text_field.dart
+│   │
+│   ├── 📂 features/
+│   │   ├── 📂 auth/
+│   │   │   ├── 📂 data/
+│   │   │   │   ├── 📄 auth_repository.dart
+│   │   │   │   └── 📄 auth_repository.g.dart
+│   │   │   ├── 📂 domain/
+│   │   │   │   └── 📄 user.dart
+│   │   │   └── 📂 presentation/
+│   │   │       ├── 📂 providers/
+│   │   │       │   └── 📄 auth_provider.dart
+│   │   │       └── 📂 screens/
+│   │   │           ├── 📄 login_screen.dart
+│   │   │           └── 📄 signup_screen.dart
+│   │   │
+│   │   ├── 📂 restaurants/
+│   │   │   ├── 📂 data/
+│   │   │   │   ├── 📄 restaurant_repository.dart
+│   │   │   │   └── 📄 restaurant_repository.g.dart
+│   │   │   ├── 📂 domain/
+│   │   │   │   ├── 📄 restaurant.dart
+│   │   │   │   └── 📄 menu_item.dart
+│   │   │   └── 📂 presentation/
+│   │   │       ├── 📂 providers/
+│   │   │       │   └── 📄 restaurants_provider.dart
+│   │   │       ├── 📂 screens/
+│   │   │       │   ├── 📄 restaurants_screen.dart
+│   │   │       │   └── 📄 restaurant_details_screen.dart
+│   │   │       └── 📂 widgets/
+│   │   │           ├── 📄 restaurant_card.dart
+│   │   │           └── 📄 menu_item_card.dart
+│   │   │
+│   │   ├── 📂 cart/
+│   │   │   ├── 📂 domain/
+│   │   │   │   └── 📄 cart_item.dart
+│   │   │   └── 📂 presentation/
+│   │   │       ├── 📂 providers/
+│   │   │       │   └── 📄 cart_provider.dart
+│   │   │       ├── 📂 screens/
+│   │   │       │   └── 📄 cart_screen.dart
+│   │   │       └── 📂 widgets/
+│   │   │           └── 📄 cart_item_card.dart
+│   │   │
+│   │   └── 📂 orders/
+│   │       ├── 📂 data/
+│   │       │   └── 📄 orders_repository.dart
+│   │       ├── 📂 domain/
+│   │       │   └── 📄 order.dart
+│   │       └── 📂 presentation/
+│   │           ├── 📂 providers/
+│   │           │   └── 📄 orders_provider.dart
+│   │           └── 📂 screens/
+│   │               └── 📄 orders_screen.dart
+│   │
+│   ├── 📂 routing/
+│   │   └── 📄 app_router.dart
+│   │
+│   ├── 📄 main.dart
+│   └── 📄 app.dart
+│
+├── 📂 assets/
+│   ├── 📂 images/
+│   ├── 📂 icons/
+│   └── 📂 fonts/
+│
+├── 📂 test/
+│   ├── 📂 features/
+│   │   └── 📂 auth/
+│   │       └── 📄 auth_provider_test.dart
+│   └── 📂 widgets/
+│       └── 📄 custom_button_test.dart
+│
+└── 📄 pubspec.yaml
+
+
+📦 food_delivery_app/
+├── 📂 lib/
+│   ├── 📂 core/
+│   │   ├── 📂 config/
+│   │   │   ├── 📄 app_config.dart
+│   │   │   └── 📄 env_config.dart
+│   │   ├── 📂 constants/
+│   │   │   ├── 📄 api_paths.dart
+│   │   │   ├── 📄 app_constants.dart
+│   │   │   └── 📄 asset_paths.dart
+│   │   ├── 📂 extensions/
+│   │   │   ├── 📄 context_extensions.dart
+│   │   │   └── 📄 string_extensions.dart
+│   │   ├── 📂 theme/
+│   │   │   ├── 📄 app_theme.dart
+│   │   │   └── 📄 app_colors.dart
+│   │   └── 📂 utils/
+│   │       ├── 📄 validators.dart
+│   │       └── 📄 formatter.dart
+│   │
+│   ├── 📂 data/
+│   │   ├── 📂 models/
+│   │   │   ├── 📄 user.dart
+│   │   │   ├── 📄 restaurant.dart
+│   │   │   ├── 📄 menu_item.dart
+│   │   │   ├── 📄 cart_item.dart
+│   │   │   └── 📄 order.dart
+│   │   └── 📂 repositories/
+│   │       ├── 📄 auth_repository.dart
+│   │       ├── 📄 restaurant_repository.dart
+│   │       └── 📄 order_repository.dart
+│   │
+│   ├── 📂 providers/
+│   │   ├── 📄 auth_provider.dart
+│   │   ├── 📄 cart_provider.dart
+│   │   ├── 📄 restaurant_provider.dart
+│   │   └── 📄 order_provider.dart
+│   │
+│   ├── 📂 widgets/
+│   │   ├── 📂 common/
+│   │   │   ├── 📄 custom_button.dart
+│   │   │   ├── 📄 custom_text_field.dart
+│   │   │   └── 📄 loading_indicator.dart
+│   │   └── 📂 cards/
+│   │       ├── 📄 restaurant_card.dart
+│   │       ├── 📄 menu_item_card.dart
+│   │       ├── 📄 cart_item_card.dart
+│   │       └── 📄 order_card.dart
+│   │
+│   ├── 📂 screens/
+│   │   ├── 📂 auth/
+│   │   │   ├── 📄 login_screen.dart
+│   │   │   ├── 📄 signup_screen.dart
+│   │   │   └── 📄 forgot_password_screen.dart
+│   │   │
+│   │   ├── 📂 home/
+│   │   │   ├── 📄 home_screen.dart
+│   │   │   └── 📂 widgets/
+│   │   │       ├── 📄 category_list.dart
+│   │   │       └── 📄 featured_restaurants.dart
+│   │   │
+│   │   ├── 📂 restaurants/
+│   │   │   ├── 📄 restaurants_screen.dart
+│   │   │   ├── 📄 restaurant_details_screen.dart
+│   │   │   └── 📂 widgets/
+│   │   │       ├── 📄 restaurant_info_header.dart
+│   │   │       └── 📄 menu_section.dart
+│   │   │
+│   │   ├── 📂 cart/
+│   │   │   ├── 📄 cart_screen.dart
+│   │   │   └── 📂 widgets/
+│   │   │       ├── 📄 cart_summary.dart
+│   │   │       └── 📄 checkout_button.dart
+│   │   │
+│   │   ├── 📂 checkout/
+│   │   │   ├── 📄 checkout_screen.dart
+│   │   │   └── 📂 widgets/
+│   │   │       ├── 📄 address_form.dart
+│   │   │       └── 📄 payment_methods.dart
+│   │   │
+│   │   ├── 📂 orders/
+│   │   │   ├── 📄 orders_screen.dart
+│   │   │   ├── 📄 order_details_screen.dart
+│   │   │   └── 📂 widgets/
+│   │   │       ├── 📄 order_status_tracker.dart
+│   │   │       └── 📄 order_items_list.dart
+│   │   │
+│   │   └── 📂 profile/
+│   │       ├── 📄 profile_screen.dart
+│   │       └── 📂 widgets/
+│   │           ├── 📄 profile_header.dart
+│   │           └── 📄 settings_list.dart
+│   │
+│   ├── 📂 routing/
+│   │   └── 📄 app_router.dart
+│   │
+│   ├── 📄 main.dart
+│   └── 📄 app.dart
+│
+├── 📂 assets/
+│   ├── 📂 images/
+│   ├── 📂 icons/
+│   └── 📂 fonts/
+│
+├── 📂 test/
+│   ├── 📂 screens/
+│   │   ├── 📂 auth/
+│   │   │   └── 📄 login_screen_test.dart
+│   │   └── 📂 home/
+│   │       └── 📄 home_screen_test.dart
+│   ├── 📂 widgets/
+│   │   └── 📄 custom_button_test.dart
+│   └── 📂 providers/
+│       └── 📄 auth_provider_test.dart
+│
+└── 📄 pubspec.yaml
