@@ -4,6 +4,7 @@ import 'package:food_hunt/screens/app/store/profile/children/change_password/blo
 import 'package:food_hunt/screens/app/store/profile/children/change_password/bloc/reset_password_bloc.dart';
 import 'package:food_hunt/screens/app/store/profile/children/store_details/bloc/upload_store_details_bloc.dart';
 import 'package:food_hunt/screens/app/user/home/bloc/address_bloc.dart';
+import 'package:food_hunt/screens/app/user/home/bloc/all_stores_bloc.dart';
 import 'package:food_hunt/screens/app/user/home/bloc/restaurants_bloc.dart';
 import 'package:food_hunt/screens/app/user/profile/bloc/user_profile_bloc.dart';
 import 'package:food_hunt/screens/app/user/profile/children/password/bloc/forgot_password_bloc.dart';
@@ -16,6 +17,7 @@ import 'package:food_hunt/screens/auth/verify_email/bloc/send_otp_bloc.dart';
 import 'package:food_hunt/screens/auth/verify_email/bloc/verify_otp_bloc.dart';
 import 'package:food_hunt/screens/auth/verify_kyc/bloc/verify_kyc_bloc.dart';
 import 'package:food_hunt/screens/app/user/profile/children/add_address/bloc/add_address_bloc.dart';
+import 'package:food_hunt/services/address_service.dart';
 import 'package:food_hunt/services/api.dart';
 import 'package:food_hunt/services/repositories/auth_repository.dart';
 
@@ -25,6 +27,8 @@ class AuthDependencies {
 
   static AuthRepository get authRepository =>
       AuthRepository(apiService, storage);
+
+  static AddressService get addressService => AddressService();
 
   static LoginBloc get loginBloc => LoginBloc(authRepository);
   static CreateAccountBloc get createAccountBloc =>
@@ -57,14 +61,18 @@ class AuthDependencies {
       UserForgotPasswordBloc(authRepository);
 
 // Address - User
-  static AddAddressBloc get addAddressBloc => AddAddressBloc(authRepository);
+  static AddAddressBloc get addAddressBloc =>
+      AddAddressBloc(authRepository, addressService);
 
   static UserAddressBloc get userAddressBloc =>
-      UserAddressBloc(authRepository)..add(FetchUserAddress());
+      UserAddressBloc(authRepository, addressService)..add(FetchUserAddress());
 
   // Restaurant
   static RestaurantsBloc get restaurantsBloc =>
       RestaurantsBloc(authRepository)..add(FetchRestaurants());
+
+  static AllRestaurantsBloc get allStoresBloc =>
+      AllRestaurantsBloc(authRepository)..add(FetchAllRestaurants());
 
   // User
 

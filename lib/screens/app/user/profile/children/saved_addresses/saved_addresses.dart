@@ -8,9 +8,12 @@ import 'package:food_hunt/core/states/error_state.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
 import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:food_hunt/screens/app/user/home/bloc/address_bloc.dart';
+import 'package:food_hunt/services/models/core/address.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SavedAddressesScreen extends ConsumerWidget {
+  SavedAddressesScreen();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -197,8 +200,8 @@ class SavedAddressesScreen extends ConsumerWidget {
                     itemCount: addresses.length,
                     itemBuilder: (context, index) {
                       final address = addresses[index];
-                      final isPrimary = address['primary'] ?? false;
-                      final label = address['label'];
+                      final isPrimary = address.primary;
+                      final label = address.label;
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
@@ -228,7 +231,7 @@ class SavedAddressesScreen extends ConsumerWidget {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          address['address'],
+                                          address.address,
                                           style: TextStyle(
                                             fontFamily: 'JK_Sans',
                                             fontSize: 14.0,
@@ -243,16 +246,17 @@ class SavedAddressesScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Row(children: [
-                                    Text(
-                                      label,
-                                      style: TextStyle(
-                                        fontFamily: 'JK_Sans',
-                                        fontSize: 12.0,
-                                        color: AppColors.subTitleTextColor,
+                                    if (label != null)
+                                      Text(
+                                        label,
+                                        style: TextStyle(
+                                          fontFamily: 'JK_Sans',
+                                          fontSize: 12.0,
+                                          color: AppColors.subTitleTextColor,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
                                     if (isPrimary)
                                       Container(
                                         margin: const EdgeInsets.only(left: 8),

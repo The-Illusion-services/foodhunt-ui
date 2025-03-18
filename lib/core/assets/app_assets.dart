@@ -3,6 +3,8 @@ abstract class AppAssets {
 
   static const home_screen_promo = 'assets/images/promo.png';
   static const paper_map = 'assets/images/rafiki.png';
+  static const map = 'assets/images/map.png';
+  static const marker = 'assets/images/gps.png';
 
   static const user_onboarding = 'assets/images/user_onboarding.png';
   static const store_onboarding = 'assets/images/store_onboarding.png';

@@ -41,8 +41,8 @@ class _LocationScreenState extends State<LocationScreen> {
       final locationData = await _location.getLocation();
       print(locationData);
       if (context.mounted) {
-        // Navigator.pushNamed(context, AppRoute.chooseAddressScreen);
-        Navigator.pushNamed(context, AppRoute.appLayout);
+        Navigator.pushNamed(context, AppRoute.chooseAddressScreen);
+        // Navigator.pushNamed(context, AppRoute.appLayout);
       }
     } catch (e) {
       if (context.mounted) {
@@ -95,6 +95,7 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
         padding: const EdgeInsets.all(24.0),
         constraints:
@@ -142,32 +143,32 @@ class _LocationScreenState extends State<LocationScreen> {
                   label: "Share Location",
                   onPressed: () => _requestLocation(context),
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: AppColors.grayBackground,
-                      side: BorderSide(color: AppColors.grayBorderColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                    ),
-                    child: Text(
-                      'Enter address manually',
-                      style: TextStyle(
-                        fontFamily: "JK_Sans",
-                        color: AppColors.bodyTextColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                // const SizedBox(height: 16),
+                // SizedBox(
+                //   width: double.infinity,
+                //   height: 56,
+                //   child: OutlinedButton(
+                //     onPressed: () {
+                //       Navigator.pop(context);
+                //     },
+                //     style: OutlinedButton.styleFrom(
+                //       backgroundColor: AppColors.grayBackground,
+                //       side: BorderSide(color: AppColors.grayBorderColor),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(28),
+                //       ),
+                //     ),
+                //     child: Text(
+                //       'Enter address manually',
+                //       style: TextStyle(
+                //         fontFamily: "JK_Sans",
+                //         color: AppColors.bodyTextColor,
+                //         fontSize: 14,
+                //         fontWeight: FontWeight.w600,
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 32),
               ],
             ),

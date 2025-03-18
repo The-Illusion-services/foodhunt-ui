@@ -12,7 +12,7 @@ class PreLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
-  int _selectedTab = 0;
+  // int _selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +32,13 @@ class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // const SizedBox(height: 24),
-            _buildTabControl(),
             const SizedBox(height: 24),
             Expanded(
               child: Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
                   child: Image.asset(
-                    _selectedTab == 0
-                        ? AppAssets.user_onboarding
-                        : AppAssets.store_onboarding,
+                    AppAssets.user_onboarding,
                     height: 229,
                     width: double.infinity,
                     fit: BoxFit.contain,
@@ -56,9 +52,7 @@ class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _selectedTab == 0
-                        ? "Your Food Journey Starts Here!"
-                        : "Manage Your Restaurant Effortlessly",
+                    "Your Food Journey Starts Here!",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -71,9 +65,7 @@ class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    _selectedTab == 0
-                        ? "Discover top restaurants near you. Sign up to order, customize, and track your meals!"
-                        : "Join our platform to upload your menu, attract more customers, and streamline your orders.",
+                    "Discover top restaurants near you. Sign up to order, customize, and track your meals!",
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -90,11 +82,8 @@ class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
                       AppButton(
                           label: "Sign up",
                           onPressed: () {
-                            _selectedTab == 0
-                                ? Navigator.pushNamed(
-                                    context, AppRoute.userSignUpScreen)
-                                : Navigator.pushNamed(
-                                    context, AppRoute.storeSignUpScreen);
+                            Navigator.pushNamed(
+                                context, AppRoute.userSignUpScreen);
                           }),
                       const SizedBox(
                         height: 12,
@@ -111,51 +100,6 @@ class _PreLoginScreenState extends ConsumerState<PreLoginScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTabControl() {
-    return Container(
-      width: double.infinity,
-      child: CustomSlidingSegmentedControl<int>(
-        isStretch: true,
-        innerPadding: const EdgeInsets.all(4),
-        initialValue: _selectedTab,
-        children: {
-          0: Text(
-            "Personal",
-            style: TextStyle(
-              fontFamily: "JK_Sans",
-              color: _selectedTab == 0 ? Colors.white : AppColors.unActiveTab,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
-          ),
-          1: Text(
-            "Business",
-            style: TextStyle(
-                fontFamily: "JK_Sans",
-                color: _selectedTab == 1 ? Colors.white : AppColors.unActiveTab,
-                fontWeight: FontWeight.w700,
-                fontSize: 14),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            _selectedTab = value;
-          });
-        },
-        decoration: BoxDecoration(
-          color: Color(0xfff1f2f6),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        thumbDecoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        curve: Curves.easeInOut,
-        duration: Duration(milliseconds: 300),
       ),
     );
   }

@@ -34,7 +34,7 @@ class CartItemWidget extends StatelessWidget {
           ),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.network(
+            child: Image.asset(
               item.imageUrl,
               width: 64,
               height: 64,

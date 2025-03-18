@@ -30,6 +30,7 @@ class _CreateStoreAccountTypeScreenState
 
     // final GlobalKey<FormState> _createAccountFormKey = GlobalKey<FormState>();
     // TextEditingController _userNameController = TextEditingController();
+
     TextEditingController _firstNameController = TextEditingController();
     TextEditingController _lastNameController = TextEditingController();
     TextEditingController _emailController = TextEditingController();
@@ -118,7 +119,6 @@ class _CreateStoreAccountTypeScreenState
                   //     if (value == null || value.isEmpty) {
                   //       return 'Username is required';
                   //     }
-
                   //     return null;
                   //   },
                   // ),

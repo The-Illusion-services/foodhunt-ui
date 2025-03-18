@@ -14,6 +14,9 @@ import 'package:food_hunt/screens/app/store/orders/bloc/completed_orders_bloc.da
 import 'package:food_hunt/screens/app/store/orders/bloc/new_orders_bloc.dart';
 import 'package:food_hunt/screens/app/store/orders/bloc/ongoing_orders_bloc.dart';
 import 'package:food_hunt/screens/app/store/profile/bloc/store_profile_bloc.dart';
+import 'package:food_hunt/screens/app/user/favorites/bloc/favorite_items_bloc.dart';
+import 'package:food_hunt/screens/app/user/favorites/bloc/favorite_stores_bloc.dart';
+import 'package:food_hunt/screens/app/user/store/bloc/dishes_bloc.dart';
 import 'package:food_hunt/services/api.dart';
 import 'package:food_hunt/services/repositories/restaurant_repository.dart';
 
@@ -47,6 +50,9 @@ class RestaurantDependencies {
   static FetchDishBloc get fetchDishBloc =>
       FetchDishBloc(restaurantRepository)..add(FetchAllDishes());
 
+  static StoreDishesBloc get fetchStoreDishesBloc =>
+      StoreDishesBloc(restaurantRepository);
+
   static FetchSingleMenuBloc get fetchSingleMenuBloc =>
       FetchSingleMenuBloc(restaurantRepository);
 
@@ -65,4 +71,11 @@ class RestaurantDependencies {
 
   static CompletedOrdersBloc get fetchCompletedOrdersBloc =>
       CompletedOrdersBloc(restaurantRepository)..add(FetchCompletedOrders());
+
+  // favorites
+  static FavoriteItemsBloc get favoriteItemsBloc =>
+      FavoriteItemsBloc(restaurantRepository)..add(LoadFavoriteItems());
+
+  static FavoriteStoresBloc get favoriteStoresBloc =>
+      FavoriteStoresBloc(restaurantRepository)..add(LoadFavoriteStores());
 }

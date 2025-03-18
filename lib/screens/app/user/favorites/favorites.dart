@@ -1,11 +1,16 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:food_hunt/core/assets/app_assets.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/constants/app_constants.dart';
+import 'package:food_hunt/core/states/empty_state.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
+import 'package:food_hunt/screens/app/user/favorites/bloc/favorite_items_bloc.dart';
+import 'package:food_hunt/screens/app/user/favorites/bloc/favorite_stores_bloc.dart';
 
 class FavoritesScreen extends ConsumerStatefulWidget {
   @override
@@ -14,6 +19,14 @@ class FavoritesScreen extends ConsumerStatefulWidget {
 
 class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
   int _selectedTab = 0;
+
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+
+  Future<void> _refreshData() async {
+    context.read<FavoriteStoresBloc>().add(LoadFavoriteStores());
+    context.read<FavoriteItemsBloc>().add(LoadFavoriteItems());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,13 +98,257 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
             _buildTabControl(),
             const SizedBox(height: 24),
             Expanded(
-              child: _selectedTab == 0
-                  ? _buildFavoriteStores()
-                  : _buildFavoriteItems(),
+              child: RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: _refreshData,
+                child: _selectedTab == 0
+                    ? _buildFavoriteStores()
+                    : _buildFavoriteItems(),
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFavoriteStores() {
+    return BlocBuilder<FavoriteStoresBloc, FavoriteStoresState>(
+      builder: (context, state) {
+        if (state is FavoriteStoresLoading) {
+          return Center(
+            child: Theme.of(context).platform == TargetPlatform.iOS
+                ? const CupertinoActivityIndicator(
+                    radius: 12,
+                    color: AppColors.primary,
+                  )
+                : const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+          );
+        } else if (state is FavoriteStoresEmpty) {
+          return Center(
+              child: emptyState(context, "No favorite stores found",
+                  btnText: "Load again", onTap: () {
+            context.read<FavoriteStoresBloc>().add(LoadFavoriteStores());
+          }));
+        } else if (state is FavoriteStoresError) {
+          return Center(child: Text(state.message));
+        } else if (state is FavoriteStoresLoaded) {
+          return ListView.builder(
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage(AppAssets.storeLogoBK),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "Pizza Hut",
+                                style: TextStyle(
+                                  fontFamily: 'JK_Sans',
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.bodyTextColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(width: 4),
+                              SvgPicture.string(
+                                SvgIcons.starIcon,
+                                colorFilter: ColorFilter.mode(
+                                    AppColors.appYellow, BlendMode.srcIn),
+                                width: 10,
+                                height: 10,
+                              ),
+                              Text(
+                                "4.5", // Rating
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Restaurant",
+                            style: TextStyle(
+                              fontFamily: 'JK_Sans',
+                              fontSize: 10.0,
+                              color: AppColors.subTitleTextColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Lugbe",
+                            style: TextStyle(
+                              fontFamily: 'JK_Sans',
+                              fontSize: 12.0,
+                              color: AppColors.subTitleTextColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {},
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.03),
+                          shape: BoxShape.circle,
+                        ),
+                        child: SvgPicture.string(
+                          SvgIcons.heartFilledIcon,
+                          width: 18,
+                          height: 18,
+                          colorFilter:
+                              ColorFilter.mode(Colors.red, BlendMode.srcIn),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+        return SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildFavoriteItems() {
+    return BlocBuilder<FavoriteItemsBloc, FavoriteItemsState>(
+      builder: (context, state) {
+        if (state is FavoriteItemsLoading) {
+          return Center(
+            child: Theme.of(context).platform == TargetPlatform.iOS
+                ? const CupertinoActivityIndicator(
+                    radius: 12,
+                    color: AppColors.primary,
+                  )
+                : const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+          );
+        } else if (state is FavoriteItemsEmpty) {
+          return Center(
+              child: emptyState(context, "No favorite food items found",
+                  btnText: "Load again", onTap: () {
+            context.read<FavoriteItemsBloc>().add(LoadFavoriteItems());
+          }));
+        } else if (state is FavoriteItemsError) {
+          return Center(child: Text(state.message));
+        } else if (state is FavoriteItemsLoaded) {
+          return ListView.builder(
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.asset(
+                            AppAssets.storeImage1,
+                            width: 100,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.25),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SvgPicture.string(
+                              SvgIcons.heartFilledIcon,
+                              width: 10,
+                              height: 10,
+                              colorFilter:
+                                  ColorFilter.mode(Colors.red, BlendMode.srcIn),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Grilled Chicken",
+                            style: TextStyle(
+                              fontFamily: 'JK_Sans',
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.bodyTextColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Lorem ipsum dolor sit amet consectetur. Arcu sit mi aliquam nunc justo. Urna ut congue nulla quis id facilisis.",
+                            style: TextStyle(
+                              fontFamily: 'JK_Sans',
+                              fontSize: 12.0,
+                              color: AppColors.subTitleTextColor,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "$naira 3000",
+                            style: TextStyle(
+                              fontFamily: 'JK_Sans',
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.bodyTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+        return SizedBox.shrink();
+      },
     );
   }
 
@@ -138,191 +395,6 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
         curve: Curves.easeInOut,
         duration: Duration(milliseconds: 300),
       ),
-    );
-  }
-
-  Widget _buildFavoriteStores() {
-    return ListView.builder(
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage(AppAssets.storeLogoBK),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Pizza Hut",
-                          style: TextStyle(
-                            fontFamily: 'JK_Sans',
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.bodyTextColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(width: 4),
-                        SvgPicture.string(
-                          SvgIcons.starIcon,
-                          colorFilter: ColorFilter.mode(
-                              AppColors.appYellow, BlendMode.srcIn),
-                          width: 10,
-                          height: 10,
-                        ),
-                        Text(
-                          "4.5", // Rating
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "Restaurant",
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 10.0,
-                        color: AppColors.subTitleTextColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "Lugbe",
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 12.0,
-                        color: AppColors.subTitleTextColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              InkWell(
-                onTap: () {},
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.03),
-                    shape: BoxShape.circle,
-                  ),
-                  child: SvgPicture.string(
-                    SvgIcons.heartFilledIcon,
-                    width: 18,
-                    height: 18,
-                    colorFilter: ColorFilter.mode(Colors.red, BlendMode.srcIn),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFavoriteItems() {
-    return ListView.builder(
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset(
-                      AppAssets.storeImage1,
-                      width: 100,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
-                        shape: BoxShape.circle,
-                      ),
-                      child: SvgPicture.string(
-                        SvgIcons.heartFilledIcon,
-                        width: 10,
-                        height: 10,
-                        colorFilter:
-                            ColorFilter.mode(Colors.red, BlendMode.srcIn),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Grilled Chicken",
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.bodyTextColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Lorem ipsum dolor sit amet consectetur. Arcu sit mi aliquam nunc justo. Urna ut congue nulla quis id facilisis.",
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 12.0,
-                        color: AppColors.subTitleTextColor,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "$naira 3000",
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.bodyTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

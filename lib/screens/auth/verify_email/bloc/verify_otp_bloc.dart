@@ -57,6 +57,7 @@ class VerifyCodeBloc extends Bloc<VerifyCodeEvent, VerifyCodeState> {
     try {
       await authRepository.verifyCode(
           verificationCode: event.code, email: email!);
+      authService.setVerificationStatus(true);
       emit(VerifyCodeSuccess());
     } catch (e) {
       emit(VerifyCodeFailure(e.toString()));

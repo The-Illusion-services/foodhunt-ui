@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:food_hunt/services/address_service.dart';
+import 'package:food_hunt/services/models/core/address.dart';
 import 'package:food_hunt/services/repositories/auth_repository.dart';
 
 // Event
@@ -14,12 +16,21 @@ class AddAddress extends AddAddressEvent {
   final String address;
   final String? label;
   final bool isPrimary;
+  final dynamic longitude;
+  final dynamic latitude;
+  final String? plusCode;
 
   const AddAddress(
-      {required this.address, this.label, required this.isPrimary});
+      {required this.address,
+      this.label,
+      required this.isPrimary,
+      required this.latitude,
+      required this.longitude,
+      this.plusCode});
 
   @override
-  List<Object?> get props => [address, label, isPrimary];
+  List<Object?> get props =>
+      [address, label, isPrimary, longitude, latitude, plusCode];
 }
 
 // State
@@ -53,19 +64,37 @@ class AddressError extends AddAddressState {
 // Bloc
 class AddAddressBloc extends Bloc<AddAddressEvent, AddAddressState> {
   final AuthRepository _authRepository;
+  final AddressService _addressService;
 
-  AddAddressBloc(this._authRepository) : super(AddressInitial()) {
+  AddAddressBloc(this._authRepository, this._addressService)
+      : super(AddressInitial()) {
     on<AddAddress>(_onAddAddress);
   }
 
   Future<void> _onAddAddress(
       AddAddress event, Emitter<AddAddressState> emit) async {
     emit(AddressLoading());
+
     try {
-      await _authRepository.saveAddress(
+      final address = await _authRepository.saveAddress(
           address: event.address,
           label: event.label,
-          isPrimary: event.isPrimary);
+          longitude: event.longitude,
+          latitude: event.latitude,
+          isPrimary: event.isPrimary,
+          plusCode: event.plusCode);
+
+      final newAddress = UserAddress(
+          id: address['id'],
+          address: event.address,
+          label: event.label,
+          longitude: event.longitude,
+          latitude: event.latitude,
+          primary: event.isPrimary,
+          plusCode: event.plusCode);
+
+      await _addressService.addAddress(newAddress);
+
       emit(AddressAdded());
     } catch (e) {
       emit(AddressError(e.toString()));

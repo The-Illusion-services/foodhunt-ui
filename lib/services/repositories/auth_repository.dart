@@ -3,6 +3,7 @@ import 'dart:io';
 
 // import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:food_hunt/services/models/core/address.dart';
 import 'package:http/http.dart' as http;
 import 'package:food_hunt/core/utils/auth_service_helper.dart';
 import 'package:food_hunt/services/api.dart';
@@ -313,29 +314,43 @@ class AuthRepository {
 
   // Address
 
-  Future<List<dynamic>> getUserAddresses() async {
+  Future<List<UserAddress>> getUserAddresses() async {
     try {
-      final response = await _apiService.get(
-        '/auth/address/',
-      );
+      final response = await _apiService.get('/auth/address/');
 
-      print(response);
-
-      return response['data'];
+      if (response['data'] != null && response['data'] is List) {
+        return (response['data'] as List)
+            .map((json) => UserAddress.fromJson(json))
+            .toList();
+      } else {
+        return [];
+      }
     } catch (e) {
-      throw e.toString();
+      throw Exception('Failed to fetch user addresses: $e');
     }
   }
 
-  Future<void> saveAddress(
-      {required String address, String? label, required bool isPrimary}) async {
+  Future<Map<String, dynamic>> saveAddress({
+    required String address,
+    required dynamic longitude,
+    required dynamic latitude,
+    String? label,
+    required bool isPrimary,
+    String? plusCode,
+  }) async {
     try {
-      final response = await _apiService.post('/auth/address/',
-          data: {"address": address, "primary": isPrimary, "label": label});
+      final response = await _apiService.post('/auth/address/', data: {
+        "address": address,
+        "primary": isPrimary,
+        "label": label,
+        'longitude': longitude.toString(),
+        'latitude': latitude.toString(),
+        'plus_code': plusCode
+      });
 
-      print(response);
+      print(response['data']['details']);
 
-      return response;
+      return response['data']['details'];
     } catch (e) {
       throw e.toString();
     }
@@ -348,11 +363,38 @@ class AuthRepository {
         '/auth/restaurants/',
       );
 
-      // print(response);
-
       return response;
     } catch (e) {
       throw e.toString();
+    }
+  }
+
+  Future<List<dynamic>> fetchAllStores() async {
+    try {
+      final response = await _apiService.get(
+        '/restaurant/all-restaurants/',
+      );
+
+      return response['restaurants'];
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  // Update favorite stores
+  Future<void> toggleStoreFavorite(String storeId) async {
+    try {
+      final response = await _apiService.post(
+        '/restaurant//${storeId}/favorite/',
+      );
+
+      print(response);
+
+      // if (response.status != 200 || response.status != 201) {
+      //   throw Exception('Failed to update favorite status');
+      // }
+    } catch (e) {
+      throw Exception('Failed to update favorite status: ${e.toString()}');
     }
   }
 }

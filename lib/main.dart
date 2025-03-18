@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:food_hunt/app.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  await dotenv.load(fileName: ".env");
+
+  final String? mapBoxAccessToken = dotenv.env['MAPBOX_ACCESS_TOKEN'];
+
+  if (mapBoxAccessToken == null) {
+    throw Exception('MAPBOX_ACCESS_TOKEN is not set in .env file');
+  }
+
+  MapboxOptions.setAccessToken(mapBoxAccessToken);
+
   runApp(ProviderScope(child: MyApp()));
+
+  FlutterNativeSplash.remove();
 }
+
+
+
 
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});

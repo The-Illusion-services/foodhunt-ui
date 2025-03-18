@@ -33,7 +33,7 @@ import 'package:food_hunt/screens/auth/verify_kyc/view/verify_kyc.dart';
 import 'package:food_hunt/screens/onboarding/onboarding.dart';
 import 'package:food_hunt/screens/app/user/profile/children/add_address/view/add_address.dart';
 import 'package:food_hunt/screens/select_location/choose_address.dart';
-import 'package:food_hunt/screens/select_location/confirm_location.dart';
+// import 'package:food_hunt/screens/select_location/confirm_location.dart';
 import 'package:food_hunt/screens/select_location/share_location.dart';
 
 abstract class AppPages {
@@ -48,11 +48,13 @@ abstract class AppPages {
     AppRoute.userSignUpScreen: (_) => const CreateUserAccountTypeScreen(),
     AppRoute.verifyEmailScreen: (_) => const VerifyEmailAddress(),
     AppRoute.shareLocationScreen: (_) => LocationScreen(),
-    AppRoute.confirmLocationScreen: (_) => MapConfirmationScreen(),
+    // AppRoute.confirmLocationScreen: (_) => MapConfirmationScreen(),
     AppRoute.chooseAddressScreen: (_) => ChooseAddressScreen(),
     AppRoute.addAddressScreen: (_) => AddAddressScreen(),
 
     AppRoute.loginScreen: (_) => LoginScreen(),
+    // AppRoute.loginScreen: (_) => LocationScreen(),
+
     AppRoute.resetPasswordScreen: (_) => const ResetPasswordScreen(),
     AppRoute.verifyOTPScreen: (_) => const VerifyCode(),
     AppRoute.setNewPasswordScreen: (_) => const CreateNewPassword(),

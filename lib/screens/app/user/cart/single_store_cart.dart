@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:food_hunt/core/assets/app_assets.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
 import 'package:food_hunt/services/models/core/cart.dart';
@@ -18,13 +19,13 @@ class StoreCartPage extends StatefulWidget {
 class _StoreCartPageState extends State<StoreCartPage> {
   List<CartItem> cartItems = [
     CartItem(
-      imageUrl: 'https://via.placeholder.com/64',
+      imageUrl: AppAssets.storeLogoCR,
       name: 'BBQ Mega Meat',
       details: 'BBQ Mega Meat, BBQ Mega Meat, BBQ Mega Meat',
       price: 12.99,
     ),
     CartItem(
-      imageUrl: 'https://via.placeholder.com/64',
+      imageUrl: AppAssets.storeImage3,
       name: 'Vegan Delight',
       details: 'Vegan Delight with fresh veggies and spices',
       price: 9.99,

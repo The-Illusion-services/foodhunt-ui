@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:food_hunt/core/assets/app_assets.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
+import 'package:food_hunt/core/utils/auth_service_helper.dart';
 import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:food_hunt/screens/app/user/profile/bloc/user_profile_bloc.dart';
 import 'package:food_hunt/screens/app/user/profile/children/password/bloc/forgot_password_bloc.dart';
+import 'package:food_hunt/screens/auth/login/bloc/login_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'widgets/settings_item.dart';
@@ -231,6 +233,20 @@ class ProfileScreenState extends State<ProfileScreen> {
                                       title: 'Privacy policy',
                                       onTap: () {
                                         // Handle contact support tap
+                                      },
+                                    ),
+                                  ]),
+
+                                  _buildSettingsGroup('Accounts', [
+                                    SettingsItem(
+                                      icon: SvgIcons.policyIcon,
+                                      title: 'Logout',
+                                      onTap: () async {
+                                        context
+                                            .read<LoginBloc>()
+                                            .add(LogoutRequested());
+                                        Navigator.pushNamed(
+                                            context, AppRoute.loginScreen);
                                       },
                                     ),
                                   ]),

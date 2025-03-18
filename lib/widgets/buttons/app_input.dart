@@ -14,12 +14,14 @@ class AppInputField extends StatefulWidget {
   final Color textColor;
   final Color cursorColor;
   final Widget? prefixIcon;
+  final int? maxLength;
 
   const AppInputField({
     Key? key,
     required this.label,
     required this.hintText,
     required this.controller,
+    this.maxLength,
     this.keyboardType = TextInputType.text,
     this.isPassword = false,
     this.onChanged,
@@ -69,6 +71,7 @@ class _AppInputFieldState extends State<AppInputField> {
             widget.onChanged?.call(value);
             _validateInput(value);
           },
+          maxLength: widget.maxLength,
           cursorColor: widget.cursorColor,
           decoration: InputDecoration(
               filled: true,

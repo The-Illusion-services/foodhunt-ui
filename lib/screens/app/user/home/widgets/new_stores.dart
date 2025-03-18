@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:food_hunt/core/config/enums.dart';
+import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
@@ -125,7 +126,7 @@ class NewStoresSection extends StatelessWidget {
               height: 150,
               decoration: BoxDecoration(
                 color: AppColors.grayBackground,
-                border: Border.all(color: AppColors.grayBorderColor),
+                border: Border.all(color: Colors.transparent),
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Column(
@@ -150,33 +151,7 @@ class NewStoresSection extends StatelessWidget {
           final stores = state.stores['new_restaurants'] as List<dynamic>;
 
           if (stores.isEmpty) {
-            return Center(
-              child: Container(
-                width: double.infinity,
-                height: 150,
-                decoration: BoxDecoration(
-                  color: AppColors.grayBackground,
-                  border: Border.all(color: AppColors.grayBorderColor),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.store_mall_directory_outlined,
-                        color: AppColors.grayTextColor, size: 40),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "No stores found.",
-                      style: TextStyle(
-                          fontFamily: 'JK_Sans',
-                          fontSize: 14.0,
-                          color: AppColors.grayTextColor,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return SizedBox.shrink();
           }
 
           return Column(
@@ -200,130 +175,185 @@ class NewStoresSection extends StatelessWidget {
                   itemCount: stores.length,
                   itemBuilder: (context, index) {
                     final store = stores[index];
-                    return Container(
-                      margin: const EdgeInsets.only(right: 12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
+                    return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed(AppRoute.storeScreen, arguments: {
+                            'storeId': store['id'].toString(),
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                    12.0), // Ensures the image itself has rounded corners
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: AppColors.grayBorderColor,
-                                      width: 2.0,
-                                    ),
+                              Stack(
+                                children: [
+                                  ClipRRect(
                                     borderRadius: BorderRadius.circular(
-                                        12.0), // Matches the border radius of the image
-                                  ),
-                                  child: Image.network(
-                                    store['header_image'] ?? '',
-                                    height: 150.0,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
+                                        12.0), // Ensures the image itself has rounded corners
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: AppColors.grayBorderColor,
+                                          width: 2.0,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                            12.0), // Matches the border radius of the image
+                                      ),
+                                      child: Image.network(
+                                        store['header_image'] ?? '',
                                         height: 150.0,
                                         width: double.infinity,
-                                        color: AppColors.grayBackground,
-                                        child: const Icon(
-                                          Icons.image,
-                                          size: 32,
-                                          color: AppColors.subTitleTextColor,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 8.0,
-                                right: 8.0,
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(100),
-                                      color: const Color.fromRGBO(
-                                          255, 255, 255, 0.2),
-                                    ),
-                                    child: Center(
-                                      child: SvgPicture.string(
-                                        SvgIcons.heartOutLinedIcon,
-                                        width: 11,
-                                        height: 11,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Container(
+                                            height: 150.0,
+                                            width: double.infinity,
+                                            color: AppColors.grayBackground,
+                                            child: const Icon(
+                                              Icons.image,
+                                              size: 32,
+                                              color:
+                                                  AppColors.subTitleTextColor,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(42.0),
-                                child: Image.network(
-                                  store['profile_image'] ?? '',
-                                  width: 32.0,
-                                  height: 32.0,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return CircleAvatar(
-                                      radius: 16.0,
-                                      backgroundColor: AppColors.grayBackground,
-                                      child: SvgPicture.string(
-                                        SvgIcons.profileIcon,
-                                        width: 16,
-                                        height: 16,
-                                        colorFilter: ColorFilter.mode(
-                                          AppColors.subTitleTextColor,
-                                          BlendMode.srcIn,
+                                  Positioned(
+                                    top: 8.0,
+                                    right: 8.0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        final bloc =
+                                            context.read<RestaurantsBloc>();
+                                        final currentState =
+                                            store['is_favorited'] as bool;
+
+                                        // Optimistically update the UI
+                                        bloc.add(UpdateStoreFavoriteStatus(
+                                          storeId: store['id'].toString(),
+                                          isFavorited: !currentState,
+                                        ));
+
+                                        // Make the API call
+                                        bloc.add(ToggleStoreFavorite(
+                                          storeId: store['id'].toString(),
+                                          onError: () {
+                                            // Revert the optimistic update if the API call fails
+                                            bloc.add(UpdateStoreFavoriteStatus(
+                                              storeId: store['id'].toString(),
+                                              isFavorited: currentState,
+                                            ));
+
+                                            // Show error message
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'Failed to update favorite status'),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                        ));
+                                      },
+                                      child: Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          color: const Color.fromRGBO(
+                                              255, 255, 255, 0.2),
                                         ),
-                                        // color: AppColors.subTitleTextColor,
+                                        child: Center(
+                                          child: SvgPicture.string(
+                                            store['is_favorited']
+                                                ? SvgIcons
+                                                    .heartFilledIcon // You'll need to add this icon
+                                                : SvgIcons.heartOutLinedIcon,
+                                            width: 14,
+                                            height: 14,
+                                            colorFilter: ColorFilter.mode(
+                                              store['is_favorited']
+                                                  ? Colors.red
+                                                  : Colors.white,
+                                              BlendMode.srcIn,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      store['name'] ?? '...',
-                                      style: const TextStyle(
-                                        fontFamily: 'JK_Sans',
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.bodyTextColor,
-                                      ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(42.0),
+                                    child: Image.network(
+                                      store['profile_image'] ?? '',
+                                      width: 32.0,
+                                      height: 32.0,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return CircleAvatar(
+                                          radius: 16.0,
+                                          backgroundColor:
+                                              AppColors.grayBackground,
+                                          child: SvgPicture.string(
+                                            SvgIcons.profileIcon,
+                                            width: 16,
+                                            height: 16,
+                                            colorFilter: ColorFilter.mode(
+                                              AppColors.subTitleTextColor,
+                                              BlendMode.srcIn,
+                                            ),
+                                            // color: AppColors.subTitleTextColor,
+                                          ),
+                                        );
+                                      },
                                     ),
-                                    const SizedBox(width: 4.0),
-                                    Text(
-                                      store['category'] ?? '...',
-                                      style: const TextStyle(
-                                        fontFamily: 'JK_Sans',
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColors.grayTextColor,
-                                      ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          store['name'] ?? '...',
+                                          style: const TextStyle(
+                                            fontFamily: 'JK_Sans',
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.bodyTextColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4.0),
+                                        Text(
+                                          store['category'] ?? '...',
+                                          style: const TextStyle(
+                                            fontFamily: 'JK_Sans',
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.w400,
+                                            color: AppColors.grayTextColor,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    );
+                        ));
                   },
                 ),
               ),

@@ -12,6 +12,32 @@ abstract class RestaurantsEvent extends Equatable {
 
 class FetchRestaurants extends RestaurantsEvent {}
 
+class ToggleStoreFavorite extends RestaurantsEvent {
+  final String storeId;
+  final Function onError;
+
+  const ToggleStoreFavorite({
+    required this.storeId,
+    required this.onError,
+  });
+
+  @override
+  List<Object?> get props => [storeId];
+}
+
+class UpdateStoreFavoriteStatus extends RestaurantsEvent {
+  final String storeId;
+  final bool isFavorited;
+
+  const UpdateStoreFavoriteStatus({
+    required this.storeId,
+    required this.isFavorited,
+  });
+
+  @override
+  List<Object> get props => [storeId, isFavorited];
+}
+
 // States
 abstract class RestaurantsState extends Equatable {
   const RestaurantsState();
@@ -31,6 +57,14 @@ class RestaurantsLoaded extends RestaurantsState {
 
   @override
   List<Object> get props => [stores];
+
+  RestaurantsLoaded copyWith({
+    Map<String, dynamic>? stores,
+  }) {
+    return RestaurantsLoaded(
+      stores: stores ?? this.stores,
+    );
+  }
 }
 
 class RestaurantsError extends RestaurantsState {
@@ -48,6 +82,8 @@ class RestaurantsBloc extends Bloc<RestaurantsEvent, RestaurantsState> {
 
   RestaurantsBloc(this._authRepository) : super(RestaurantsInitial()) {
     on<FetchRestaurants>(_onFetchRestaurants);
+    on<ToggleStoreFavorite>(_onToggleStoreFavorite);
+    on<UpdateStoreFavoriteStatus>(_onUpdateStoreFavoriteStatus);
   }
 
   Future<void> _onFetchRestaurants(
@@ -58,6 +94,61 @@ class RestaurantsBloc extends Bloc<RestaurantsEvent, RestaurantsState> {
       emit(RestaurantsLoaded(stores: stores));
     } catch (e) {
       emit(RestaurantsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onToggleStoreFavorite(
+      ToggleStoreFavorite event, Emitter<RestaurantsState> emit) async {
+    try {
+      await _authRepository.toggleStoreFavorite(event.storeId);
+    } catch (e) {
+      event.onError();
+    }
+  }
+
+  void _onUpdateStoreFavoriteStatus(
+      UpdateStoreFavoriteStatus event, Emitter<RestaurantsState> emit) {
+    if (state is RestaurantsLoaded) {
+      final currentState = state as RestaurantsLoaded;
+      final updatedStores = Map<String, dynamic>.from(currentState.stores);
+
+      // Update featured restaurants
+      if (updatedStores.containsKey('featured_restaurants')) {
+        final featuredRestaurants = List<Map<String, dynamic>>.from(
+            updatedStores['featured_restaurants'] as List);
+
+        final storeIndex = featuredRestaurants
+            .indexWhere((store) => store['id'].toString() == event.storeId);
+
+        if (storeIndex != -1) {
+          featuredRestaurants[storeIndex] = {
+            ...featuredRestaurants[storeIndex],
+            'is_favorited': event.isFavorited,
+          };
+
+          updatedStores['featured_restaurants'] = featuredRestaurants;
+        }
+      }
+
+      // Update all restaurants if they exist in the state
+      if (updatedStores.containsKey('all_restaurants')) {
+        final allRestaurants = List<Map<String, dynamic>>.from(
+            updatedStores['new_restaurants'] as List);
+
+        final storeIndex = allRestaurants
+            .indexWhere((store) => store['id'].toString() == event.storeId);
+
+        if (storeIndex != -1) {
+          allRestaurants[storeIndex] = {
+            ...allRestaurants[storeIndex],
+            'is_favorited': event.isFavorited,
+          };
+
+          updatedStores['new_restaurants'] = allRestaurants;
+        }
+      }
+
+      emit(RestaurantsLoaded(stores: updatedStores));
     }
   }
 }

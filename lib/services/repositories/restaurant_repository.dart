@@ -334,4 +334,33 @@ class RestaurantRepository {
       throw (e.toString());
     }
   }
+
+  // Favorites
+  Future<List<dynamic>> fetchFavoriteItems() async {
+    try {
+      final response = await _apiService.get(
+        '/restaurant/favorites/dishes/',
+      );
+
+      print(response);
+
+      return response;
+    } catch (e) {
+      throw (e.toString());
+    }
+  }
+
+  Future<List<dynamic>> fetchFavoriteStores() async {
+    try {
+      final response = await _apiService.get(
+        '/restaurant/favorites/restaurants/',
+      );
+
+      print(response);
+
+      return response;
+    } catch (e) {
+      throw (e.toString());
+    }
+  }
 }

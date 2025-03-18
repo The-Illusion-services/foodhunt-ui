@@ -10,6 +10,7 @@ import 'package:food_hunt/screens/auth/login/bloc/login_bloc.dart';
 import 'package:food_hunt/widgets/buttons/app_button.dart';
 import 'package:food_hunt/widgets/buttons/app_input.dart';
 import 'package:food_hunt/widgets/toast/app_toast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toastification/toastification.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,6 +47,23 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final loginBloc = context.read<LoginBloc>();
+    const List<String> scopes = <String>[
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ];
+
+    GoogleSignIn _googleSignIn = GoogleSignIn(
+      // clientId: 'your-client_id.apps.googleusercontent.com',
+      scopes: scopes,
+    );
+
+    Future<void> _handleGoogleSignIn() async {
+      try {
+        await _googleSignIn.signIn();
+      } catch (error) {
+        print(error);
+      }
+    }
 
     void _goToSignUp() {
       Navigator.pushNamed(context, AppRoute.signUpScreen);
@@ -58,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen>
     void _navigateToDashboard(String accountType, bool hasRestaurantProfile) {
       if (accountType == AccountType.buyer.type) {
         Navigator.pushNamed(context, AppRoute.appLayout);
-      } else if (accountType == AccountType.restaurant) {
+      } else if (accountType == AccountType.restaurant.type) {
         if (hasRestaurantProfile) {
           Navigator.pushNamed(context, AppRoute.storeLayout);
         } else {
@@ -105,7 +123,8 @@ class _LoginScreenState extends State<LoginScreen>
           }
         },
         builder: (context, state) {
-          return Padding(
+          return SingleChildScrollView(
+              child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
             child: Form(
               key: _loginFormKey, // Attach the GlobalKey to the Form
@@ -240,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: _handleGoogleSignIn,
                     icon: Image.asset(
                       AppAssets.google,
                       height: 24,
@@ -293,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ],
               ),
             ),
-          );
+          ));
         },
       ),
     );

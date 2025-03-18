@@ -13,51 +13,53 @@ Widget errorState(
     bool? showText = true}) {
   return Builder(
     builder: (BuildContext context) {
-      return Column(
-        children: [
-          Expanded(
-              child: Center(
-                  child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
             children: [
-              Lottie.asset(
-                AppAssets.errorStateJson,
-                width: 100,
-                height: 125,
-                fit: BoxFit.fill,
-              ),
-              const SizedBox(height: 32),
-              if (showText == true)
-                Text("Something went wrong!",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        fontFamily: Font.jkSans.fontName,
-                        color: AppColors.bodyTextColor)),
-              if (showText == true)
-                Text(
-                  "It's not you, it's us. And we are fixing this right away. Please hold...",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16,
-                      fontFamily: Font.jkSans.fontName,
-                      color: AppColors.subTitleTextColor),
-                  textAlign: TextAlign.center,
-                ),
-              if (showText == true)
-                const SizedBox(
-                  height: 32,
-                ),
-              AppButton(
-                label: btnText ?? "Try again",
-                onPressed: () {
-                  onTap!();
-                },
-              )
+              Expanded(
+                  child: Center(
+                      child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    AppAssets.errorStateJson,
+                    width: 100,
+                    height: 125,
+                    fit: BoxFit.fill,
+                  ),
+                  const SizedBox(height: 32),
+                  if (showText == true)
+                    Text("Something went wrong!",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            fontFamily: Font.jkSans.fontName,
+                            color: AppColors.bodyTextColor)),
+                  if (showText == true)
+                    Text(
+                      "It's not you, it's us. And we are fixing this right away. Please hold...",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16,
+                          fontFamily: Font.jkSans.fontName,
+                          color: AppColors.subTitleTextColor),
+                      textAlign: TextAlign.center,
+                    ),
+                  if (showText == true)
+                    const SizedBox(
+                      height: 32,
+                    ),
+                  AppButton(
+                    label: btnText ?? "Try again",
+                    onPressed: () {
+                      onTap!();
+                    },
+                  )
+                ],
+              )))
             ],
-          )))
-        ],
-      );
+          ));
     },
   );
 }

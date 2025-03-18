@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:food_hunt/core/config/enums.dart';
 import 'package:food_hunt/core/constants/app_constants.dart';
 import 'package:food_hunt/core/utils/auth_service_helper.dart';
 import 'package:food_hunt/routing/pages/app_pages.dart';
 import 'package:food_hunt/routing/routes/app_routes.dart';
+import 'package:food_hunt/screens/app/user/cart/bloc/cart_bloc.new.dart';
+import 'package:food_hunt/screens/app/user/cart/bloc/cart_event.new.dart';
 import 'package:food_hunt/services/dependencies/auth_dependencies.dart';
+import 'package:food_hunt/services/dependencies/orders_dependencies.dart';
 import 'package:food_hunt/services/dependencies/restaurant_dependencies.dart';
 import 'package:food_hunt/services/dependencies/user_dependencies.dart';
 import 'package:food_hunt/state/app_state/app_bloc.dart';
@@ -21,6 +25,11 @@ class MyApp extends ConsumerWidget {
     final bool isVerified = await authService.isVerified();
     final bool hasRestaurantProfile = await authService.hasRestaurant();
     // final bool hasRestaurantProfile = await authService.hs();
+
+    print(isLoggedIn);
+    print(accountType);
+    print(isVerified);
+    print(hasRestaurantProfile);
 
     if (!isLoggedIn) {
       return AppRoute.preLoginScreen;
@@ -71,8 +80,19 @@ class MyApp extends ConsumerWidget {
 
         final _initialRoute = snapshot.data!;
 
+        // final authRepository = AuthRepository();
+        // final userAddressBloc =
+        //     UserAddressBloc(authRepository, AddressService());
+        // final addressService = AddressService(userAddressBloc);
+
+        // // Load addresses from SharedPreferences when the app starts
+        // userAddressBloc.add(LoadAddressesFromPrefs());
+
         return MultiBlocProvider(
           providers: [
+            BlocProvider(
+              create: (context) => CartBloc()..add(LoadCart()),
+            ),
             BlocProvider(
               create: (_) => TabBloc()..add(OnInitialTabEvent()),
             ),
@@ -149,12 +169,23 @@ class MyApp extends ConsumerWidget {
               create: (context) => RestaurantDependencies.fetchDishBloc,
             ),
             BlocProvider(
+              create: (context) => RestaurantDependencies.fetchStoreDishesBloc,
+            ),
+            BlocProvider(
               create: (context) =>
                   RestaurantDependencies.fetchPopularDishesBloc,
             ),
 
             // Orders
-
+            BlocProvider(
+              create: (context) => OrdersDependencies.ordersBloc,
+            ),
+            BlocProvider(
+              create: (context) => OrdersDependencies.getOrderDetailsBloc,
+            ),
+            BlocProvider(
+              create: (context) => OrdersDependencies.createOrdersBloc,
+            ),
             BlocProvider(
               create: (context) => RestaurantDependencies.fetchNewOrdersBloc,
             ),
@@ -179,6 +210,17 @@ class MyApp extends ConsumerWidget {
             BlocProvider(
               create: (context) => AuthDependencies.restaurantsBloc,
             ),
+            BlocProvider(
+              create: (context) => AuthDependencies.allStoresBloc,
+            ),
+
+            //Favorites
+            BlocProvider(
+              create: (context) => RestaurantDependencies.favoriteItemsBloc,
+            ),
+            BlocProvider(
+              create: (context) => RestaurantDependencies.favoriteStoresBloc,
+            ),
 
             //User
             BlocProvider(
@@ -190,6 +232,7 @@ class MyApp extends ConsumerWidget {
           ],
           child: MaterialApp(
             title: 'Food Hunt',
+            theme: ThemeData(fontFamily: Font.jkSans.fontName),
             color: Colors.transparent,
             debugShowCheckedModeBanner: false,
             scaffoldMessengerKey: scaffoldMessenger,

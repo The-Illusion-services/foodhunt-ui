@@ -5,6 +5,7 @@ import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
 import 'package:food_hunt/core/utils/helper.dart';
 import 'package:food_hunt/screens/app/user/cart/cart.dart';
+import 'package:food_hunt/screens/app/user/cart/cart.new.dart';
 import 'package:food_hunt/screens/app/user/home/home_screen.dart';
 import 'package:food_hunt/screens/app/user/orders/orders.dart';
 import 'package:food_hunt/screens/app/user/profile/profile.dart';
@@ -109,7 +110,8 @@ class _HomeScreenState extends State<AppScreen> {
                 }
                 if (state is DiscoveryTabState) {}
                 if (state is CartTabState) {
-                  return CartScreen();
+                  // return CartScreen();
+                  return CartOverviewScreen();
                 }
                 if (state is OrdersTabState) {
                   // return const Center();
