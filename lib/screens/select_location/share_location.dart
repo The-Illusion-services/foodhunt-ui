@@ -42,7 +42,6 @@ class _LocationScreenState extends State<LocationScreen> {
       print(locationData);
       if (context.mounted) {
         Navigator.pushNamed(context, AppRoute.chooseAddressScreen);
-        // Navigator.pushNamed(context, AppRoute.appLayout);
       }
     } catch (e) {
       if (context.mounted) {

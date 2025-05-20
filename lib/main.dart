@@ -9,23 +9,10 @@ Future main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  await dotenv.load(fileName: ".env");
-
-  final String? mapBoxAccessToken = dotenv.env['MAPBOX_ACCESS_TOKEN'];
-
-  if (mapBoxAccessToken == null) {
-    throw Exception('MAPBOX_ACCESS_TOKEN is not set in .env file');
-  }
-
-  MapboxOptions.setAccessToken(mapBoxAccessToken);
-
   runApp(ProviderScope(child: MyApp()));
 
   FlutterNativeSplash.remove();
 }
-
-
-
 
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});

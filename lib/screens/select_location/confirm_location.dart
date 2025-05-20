@@ -4,22 +4,23 @@ import 'package:flutter_svg/svg.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/config/enums.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
+import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:food_hunt/screens/app/user/home/bloc/address_bloc.dart';
 import 'package:food_hunt/screens/app/user/profile/children/add_address/bloc/add_address_bloc.dart';
+import 'package:food_hunt/screens/select_location/bottom_sheet.dart';
+import 'package:food_hunt/services/models/core/address.dart';
 import 'package:food_hunt/widgets/buttons/app_button.dart';
 import 'package:food_hunt/widgets/buttons/app_input.dart';
 import 'package:food_hunt/widgets/toast/app_toast.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:toastification/toastification.dart';
 
-// Stateful Widget
 class ConfirmLocationScreen extends StatefulWidget {
-  final List<dynamic> coordinates;
-  final String placeName;
+  final UserAddress userAddress;
 
   const ConfirmLocationScreen({
     Key? key,
-    required this.coordinates,
-    required this.placeName,
+    required this.userAddress,
   }) : super(key: key);
 
   @override
@@ -27,12 +28,17 @@ class ConfirmLocationScreen extends StatefulWidget {
 }
 
 class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
-  final _addressController = TextEditingController();
-  final _labelController = TextEditingController();
+  late final TextEditingController _addressController;
+  late final TextEditingController _houseNumberController;
+  late final TextEditingController _streetController;
+  late final TextEditingController _landmarkController;
+  late final TextEditingController _labelController;
 
   bool _isPrimary = false;
   String _selectedLabel = 'Home';
   bool _showOtherLabelInput = false;
+  String _selectedState = 'Delta';
+  String? _landmark;
 
   final List<Map<String, dynamic>> _labelOptions = [
     {'label': 'Home', 'icon': Icons.home},
@@ -42,10 +48,97 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
     {'label': 'Other', 'icon': Icons.more_horiz},
   ];
 
+  final List<Map<String, String>> _landmarkOptions = [
+    {'value': 'IVIE ROAD', 'label': 'IVIE ROAD'},
+    {'value': 'OLORI19 AREA', 'label': 'OLORI19 AREA'},
+    {'value': 'NEWEKU AGBOR ROAD', 'label': 'NEWEKU AGBOR ROAD'},
+    {'value': 'FSP/HOSPITALROAD', 'label': 'FSP/HOSPITALROAD'},
+    {'value': 'NUT', 'label': 'NUT'},
+    {'value': 'NUTEXTENSION', 'label': 'NUTEXTENSION'},
+    {'value': 'OBADUDU', 'label': 'OBADUDU'},
+    {'value': 'POLICESTATION ROAD', 'label': 'POLICESTATION ROAD'},
+    {'value': 'CAMPUS3 BIG GATE', 'label': 'CAMPUS3 BIG GATE'},
+    {'value': 'BEMBO', 'label': 'BEMBO'},
+    {'value': 'URHUOKA', 'label': 'URHUOKA'},
+    {'value': 'CAMPUS2 AREA', 'label': 'CAMPUS2 AREA'},
+    {'value': 'AGHWANAAVENUE', 'label': 'AGHWANAAVENUE'},
+    {'value': 'IGBOQUATERS', 'label': 'IGBOQUATERS'},
+    {'value': 'POULTRYROAD BEGINNING', 'label': 'POULTRYROAD BEGINNING'},
+    {'value': 'POULTRYROAD ENDING', 'label': 'POULTRYROAD ENDING'},
+    {'value': 'CAMPUS4 ROAD', 'label': 'CAMPUS4 ROAD'},
+    {'value': 'CAMPUS1 ROAD', 'label': 'CAMPUS1 ROAD'},
+    {'value': 'COLLEGEROAD', 'label': 'COLLEGEROAD'},
+    {'value': 'EKREJETA', 'label': 'EKREJETA'},
+    {'value': 'RIVERROAD', 'label': 'RIVERROAD'},
+    {'value': 'BENINROAD/JUNCTION', 'label': 'BENINROAD/JUNCTION'},
+    {'value': 'UMONO', 'label': 'UMONO'},
+    {'value': 'NEWROAD(EXPRESS)', 'label': 'NEWROAD(EXPRESS)'},
+    {'value': 'OLDROAD', 'label': 'OLDROAD'},
+    {'value': 'WINNERSROAD', 'label': 'WINNERSROAD'},
+    {'value': 'LUCAS', 'label': 'LUCAS'},
+    {'value': 'LUCASEXTENSION', 'label': 'LUCASEXTENSION'},
+    {'value': 'JEHOVAHSTREET', 'label': 'JEHOVAHSTREET'},
+    {'value': 'NEWLAYOUT', 'label': 'NEWLAYOUT'},
+    {'value': 'URUVIE', 'label': 'URUVIE'},
+    {'value': 'ETAEGENE', 'label': 'ETAEGENE'},
+  ];
+
   @override
   void initState() {
     super.initState();
-    _addressController.text = widget.placeName;
+
+    // Initialize all controllers first
+    _addressController =
+        TextEditingController(text: widget.userAddress.address);
+    _houseNumberController =
+        TextEditingController(text: widget.userAddress.houseNumber);
+    _streetController = TextEditingController(text: widget.userAddress.street);
+    _landmarkController =
+        TextEditingController(text: widget.userAddress.landmark);
+    _labelController = TextEditingController();
+
+    print(widget.userAddress.toJson());
+
+    // Set state if available
+    if (widget.userAddress.state != null &&
+        widget.userAddress.state!.isNotEmpty) {
+      _selectedState = widget.userAddress.state!;
+    }
+
+    // Set label if available
+    if (widget.userAddress.label != null &&
+        widget.userAddress.label!.isNotEmpty) {
+      if (_labelOptions
+          .any((option) => option['label'] == widget.userAddress.label)) {
+        _selectedLabel = widget.userAddress.label!;
+      } else {
+        _selectedLabel = 'Other';
+        _showOtherLabelInput = true;
+        _labelController.text = widget.userAddress.label!;
+      }
+    }
+
+    // Set primary status
+    _isPrimary = widget.userAddress.primary;
+  }
+
+  void _showLandmarkBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => LandmarkSelectionSheet(
+        landmarks: _landmarkOptions,
+        onLandmarkSelected: (landmark) {
+          setState(() {
+            _landmarkController.text = landmark;
+          });
+          Navigator.pop(context);
+        },
+      ),
+    );
   }
 
   @override
@@ -127,7 +220,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                 colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
               ),
             );
-            Navigator.pop(context);
+            Navigator.pushNamed(context, AppRoute.appLayout);
             context.read<UserAddressBloc>().add(FetchUserAddress());
           }
 
@@ -148,146 +241,229 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
           }
         },
         builder: (context, state) {
-          return Stack(children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppInputField(
-                    label: "Address",
-                    hintText: 'Enter address',
-                    controller: _addressController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Address is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  // Text(
-                  //   'Coordinates: ${widget.coordinates[0]}, ${widget.coordinates[1]}',
-                  //   style: TextStyle(
-                  //     fontSize: 14,
-                  //     color: AppColors.grayTextColor,
-                  //   ),
-                  // ),
-                  // SizedBox(height: 20),
-                  Text(
-                    "Give your address a label",
-                    style: TextStyle(
-                      fontFamily: 'JK_Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.labelTextColor,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 8.0,
-                    children: _labelOptions.map((option) {
-                      return OutlinedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _selectedLabel = option['label'];
-                            _showOtherLabelInput = option['label'] == 'Other';
-                          });
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: _selectedLabel == option['label']
-                                ? AppColors.primary
-                                : AppColors.grayTextColor,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
-                        icon: Icon(
-                          option['icon'],
-                          size: 16,
-                          color: _selectedLabel == option['label']
-                              ? AppColors.primary
-                              : AppColors.grayTextColor,
-                        ),
-                        label: Text(
-                          option['label'],
-                          style: TextStyle(
-                            color: _selectedLabel == option['label']
-                                ? AppColors.primary
-                                : AppColors.grayTextColor,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 20),
-                  if (_showOtherLabelInput)
+          return Stack(
+            children: [
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     AppInputField(
-                      label: "Custom Label",
-                      hintText: 'Enter custom label',
-                      controller: _labelController,
-                      maxLength: 30,
+                      label: "House Number",
+                      hintText: 'Enter house number',
+                      controller: _houseNumberController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'House number is required';
+                        }
+                        return null;
+                      },
                     ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Checkbox(
-                        checkColor: Colors.white,
-                        activeColor: AppColors.primary,
-                        value: _isPrimary,
-                        onChanged: (value) {
-                          setState(() {
-                            _isPrimary = value!;
-                          });
-                        },
-                      ),
-                      Text('Set as primary address',
+                    SizedBox(height: 16),
+                    AppInputField(
+                      label: "Street",
+                      hintText: 'Enter street name',
+                      controller: _streetController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Street is required';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "State",
                           style: TextStyle(
-                              fontSize: 14,
-                              fontFamily: Font.jkSans.fontName,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.grayTextColor)),
-                    ],
-                  ),
-
-                  SizedBox(height: 100),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: AppButton(
-                label: "Save address",
-                isLoading: state is AddressLoading,
-                isDisabled: state is AddressLoading,
-                onPressed: () {
-                  final label = _selectedLabel == 'Other'
-                      ? _labelController.text
-                      : _selectedLabel;
-
-                  _addressBloc.add(
-                    AddAddress(
-                      address: _addressController.text,
-                      isPrimary: _isPrimary,
-                      label: label,
-                      longitude: widget.coordinates[0].toString(),
-                      latitude: widget.coordinates[1].toString(),
+                            fontFamily: 'JK_Sans',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.labelTextColor,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
+                          value: _selectedState,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: AppColors.grayTextColor,
+                                width: 1,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: AppColors.grayTextColor,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: AppColors.primary,
+                                width: 1,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          items: ['Delta']
+                              .map(
+                                (state) => DropdownMenuItem<String>(
+                                  value: state,
+                                  child: Text(state),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: null, // Disabled
+                        ),
+                      ],
                     ),
-                  );
-                },
+                    SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: _showLandmarkBottomSheet,
+                      child: AbsorbPointer(
+                        child: AppInputField(
+                          label: "Landmark",
+                          hintText: 'Select landmark',
+                          controller: _landmarkController,
+                          suffixIcon: Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.grayTextColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      "Give your address a label",
+                      style: TextStyle(
+                        fontFamily: 'JK_Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.labelTextColor,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: _labelOptions.map((option) {
+                        return OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedLabel = option['label'];
+                              _showOtherLabelInput = option['label'] == 'Other';
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: _selectedLabel == option['label']
+                                  ? AppColors.primary
+                                  : AppColors.grayTextColor,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                          icon: Icon(
+                            option['icon'],
+                            size: 16,
+                            color: _selectedLabel == option['label']
+                                ? AppColors.primary
+                                : AppColors.grayTextColor,
+                          ),
+                          label: Text(
+                            option['label'],
+                            style: TextStyle(
+                              color: _selectedLabel == option['label']
+                                  ? AppColors.primary
+                                  : AppColors.grayTextColor,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 20),
+                    if (_showOtherLabelInput)
+                      AppInputField(
+                        label: "Custom Label",
+                        hintText: 'Enter custom label',
+                        controller: _labelController,
+                        maxLength: 30,
+                      ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Checkbox(
+                          checkColor: Colors.white,
+                          activeColor: AppColors.primary,
+                          value: _isPrimary,
+                          onChanged: (value) {
+                            setState(() {
+                              _isPrimary = value!;
+                            });
+                          },
+                        ),
+                        Text(
+                          'Set as primary address',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: Font.jkSans.fontName,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.grayTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 100),
+                  ],
+                ),
               ),
-            ),
-          ]);
+              Positioned(
+                bottom: 16,
+                left: 16,
+                right: 16,
+                child: AppButton(
+                  label: "Save address",
+                  isLoading: state is AddressLoading,
+                  isDisabled: state is AddressLoading,
+                  onPressed: () {
+                    final label = _selectedLabel == 'Other'
+                        ? _labelController.text
+                        : _selectedLabel;
+
+                    _addressBloc.add(
+                      AddAddress(
+                          address: _addressController.text,
+                          houseNumber: _houseNumberController.text,
+                          street: _streetController.text,
+                          state: _selectedState,
+                          landmark: _landmarkController.text,
+                          isPrimary: _isPrimary,
+                          label: label,
+                          longitude: widget.userAddress.longitude,
+                          latitude: widget.userAddress.latitude),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
@@ -296,7 +472,53 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
   @override
   void dispose() {
     _addressController.dispose();
+    _houseNumberController.dispose();
+    _streetController.dispose();
+    _landmarkController.dispose();
     _labelController.dispose();
     super.dispose();
+  }
+}
+
+class LandmarkSelectionSheet extends StatelessWidget {
+  final List<Map<String, String>> landmarks;
+  final Function(String) onLandmarkSelected;
+
+  const LandmarkSelectionSheet({
+    Key? key,
+    required this.landmarks,
+    required this.onLandmarkSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      height: MediaQuery.of(context).size.height * 0.6,
+      child: Column(
+        children: [
+          Text(
+            'Select Landmark',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: landmarks.length,
+              itemBuilder: (context, index) {
+                final landmark = landmarks[index];
+                return ListTile(
+                  title: Text(landmark['label']!),
+                  onTap: () => onLandmarkSelected(landmark['value']!),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

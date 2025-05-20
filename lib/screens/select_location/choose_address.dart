@@ -1,16 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/theme/app_colors.dart';
-import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:food_hunt/screens/select_location/confirm_location.dart';
+import 'package:food_hunt/services/models/core/address.dart';
+// import 'package:food_hunt/screens/select_location/confirm_location.dart';
 import 'package:food_hunt/widgets/buttons/app_button.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
-import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:provider/provider.dart';
 
 class ChooseAddressScreen extends StatefulWidget {
   const ChooseAddressScreen({Key? key}) : super(key: key);
@@ -20,11 +25,21 @@ class ChooseAddressScreen extends StatefulWidget {
 }
 
 class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
-  mapbox.MapboxMap? mapboxMap;
-  final MapboxService mapboxService = MapboxService();
-  List<dynamic> searchResults = [];
-  dynamic selectedAddress;
+  late GoogleMapController mapController;
+  final TextEditingController searchController = TextEditingController();
+  LatLng? _currentPosition;
   bool _isLoading = false;
+  String? _selectedAddress;
+  Marker? _selectedMarker;
+  Set<Marker> _markers = {};
+  late UserAddress _userAddress;
+  String googleApiKey = 'Gooogle_key';
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,83 +109,78 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
               // Search Box
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: TypeAheadField(
-                  builder: (context, controller, focusNode) {
-                    return TextField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      cursorColor: AppColors.placeHolderTextColor,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: AppColors.grayBackground,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 13, horizontal: 16),
-                          hintText: "Search location",
-                          hintStyle: TextStyle(
-                            fontFamily: 'JK_Sans',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.placeHolderTextColor,
-                            height: 1.4,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: AppColors.grayBorderColor,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: AppColors.grayBorderColor,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(
-                              color: AppColors.placeHolderTextColor,
-                            ),
-                          ),
-                          prefixIcon: IconButton(
-                            icon: SvgPicture.string(
-                              SvgIcons.locationIcon,
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                  Color(0xFF808080), BlendMode.srcIn),
-                            ),
-                            onPressed: () {},
-                          )),
-                      style: TextStyle(
-                        fontFamily: 'JK_Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                        color: AppColors.bodyTextColor,
+                child: GooglePlaceAutoCompleteTextField(
+                  textEditingController: searchController,
+                  googleAPIKey: googleApiKey,
+                  inputDecoration: InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.grayBackground,
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 13, horizontal: 16),
+                    hintText: "Search location",
+                    hintStyle: TextStyle(
+                      fontFamily: 'JK_Sans',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.placeHolderTextColor,
+                      height: 1.4,
+                    ),
+                    // border: InputBorder.none,
+                    // enabledBorder: InputBorder.none,
+
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    // enabledBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(8),
+                    //   borderSide: BorderSide(
+                    //     color: AppColors.grayBorderColor,
+                    //   ),
+                    // ),
+                    // focusedBorder: OutlineInputBorder(
+                    //   borderRadius: BorderRadius.circular(8),
+                    //   borderSide: BorderSide(
+                    //     color: AppColors.placeHolderTextColor,
+                    //   ),
+                    // ),
+                    prefixIcon: IconButton(
+                      icon: SvgPicture.string(
+                        SvgIcons.locationIcon,
+                        width: 24,
+                        height: 24,
+                        colorFilter: ColorFilter.mode(
+                            Color(0xFF808080), BlendMode.srcIn),
+                      ),
+                      onPressed: () {},
+                    ),
+                  ),
+                  debounceTime: 800,
+                  countries: ["ng"],
+                  isLatLngRequired: true,
+                  getPlaceDetailWithLatLng: (Prediction prediction) {
+                    _handlePlaceSelection(prediction);
+                  },
+                  itemClick: (Prediction prediction) {
+                    _handlePlaceSelection(prediction);
+                  },
+                  itemBuilder: (context, index, Prediction prediction) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on),
+                          SizedBox(width: 7),
+                          Expanded(
+                            child: Text(prediction.description ?? ""),
+                          )
+                        ],
                       ),
                     );
                   },
-                  suggestionsCallback: (pattern) async {
-                    try {
-                      return await mapboxService
-                          .getAutocompleteSuggestions(pattern);
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('Error fetching suggestions: $e')),
-                      );
-                      return [];
-                    }
-                  },
-                  itemBuilder: (context, suggestion) {
-                    return ListTile(
-                      title: Text(suggestion['formatted']),
-                    );
-                  },
-                  onSelected: (suggestion) {
-                    print(suggestion);
-                    _handleAddressSelection(suggestion);
-                  },
+                  seperatedBuilder: Divider(),
+                  isCrossBtnShown: true,
+                  // placeType: PlaceType.,
                 ),
               ),
               // Use Current Location Button
@@ -182,93 +192,251 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
                   onPressed: _useCurrentLocation,
                 ),
               ),
-
               // Map View
               Expanded(
-                child: mapbox.MapWidget(
-                  onMapCreated: _onMapCreated,
-                ),
+                child: _isLoading
+                    ? Center(
+                        child: CupertinoActivityIndicator(
+                        color: AppColors.primary,
+                      ))
+                    : GoogleMap(
+                        onMapCreated: (controller) {
+                          setState(() {
+                            mapController = controller;
+                          });
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: _currentPosition ?? LatLng(0, 0),
+                          zoom: 14,
+                        ),
+                        markers: _markers,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: false,
+                        onTap: (LatLng position) {
+                          _getAddressFromLatLng(position);
+                        },
+                      ),
               ),
-              // List of Addresses
-              if (searchResults.isNotEmpty)
-                Container(
-                  height: 150,
-                  child: ListView.builder(
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      final address = searchResults[index];
-                      return ListTile(
-                        title: Text(address['formatted']),
-                        onTap: () => _handleAddressSelection(address),
-                      );
-                    },
-                  ),
-                ),
             ],
           ),
-          // Loading Overlay
-          if (_isLoading)
-            const Positioned.fill(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
+          if (_selectedAddress != null)
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: _buildAddressConfirmationCard(),
             ),
         ],
       ),
     );
   }
 
-  void _handleAddressSelection(dynamic suggestion) {
+  Widget _buildAddressConfirmationCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Selected Location",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.bodyTextColor,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              _selectedAddress ?? "",
+              style: TextStyle(fontSize: 14, color: AppColors.grayTextColor),
+            ),
+            SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConfirmLocationScreen(
+                          // address: _selectedAddress as String,
+                          // coordinates: _currentPosition as LatLng,
+                          userAddress: _userAddress),
+                    ),
+                  );
+                },
+                child: Text(
+                  "Confirm Location",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _showLocationError('Location services are disabled.');
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _showLocationError('Location permissions are denied.');
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      _showLocationError('Location permissions are permanently denied.');
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _currentPosition = LatLng(position.latitude, position.longitude);
+        _isLoading = false;
+      });
+
+      _getAddressFromLatLng(_currentPosition!);
+      _handlePlaceSelection(Prediction(
+          lat: _currentPosition?.latitude.toString(),
+          lng: _currentPosition?.longitude.toString()));
+    } catch (e) {
+      _showLocationError('Error getting current location: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _handlePlaceSelection(Prediction prediction) async {
+    if (prediction.lat == null || prediction.lng == null) return;
+
+    final latLng =
+        LatLng(double.parse(prediction.lat!), double.parse(prediction.lng!));
+
     setState(() {
-      selectedAddress = suggestion;
+      _currentPosition = latLng;
+      _selectedAddress = prediction.description;
+      _markers = {
+        Marker(
+          markerId: MarkerId('selected_location'),
+          position: latLng,
+          infoWindow: InfoWindow(title: prediction.description),
+        ),
+      };
     });
 
-    final coordinates = suggestion['geometry']['coordinates'];
-    mapboxMap?.flyTo(
-      mapbox.CameraOptions(
-        center: mapbox.Point(
-          coordinates: mapbox.Position(
-            4.3,
-            9.0,
-          ),
-        ),
-        zoom: 14,
-      ),
-      mapbox.MapAnimationOptions(duration: 1000),
-    );
-    _showAddressConfirmationBottomSheet(suggestion);
-  }
-
-  void _onMapCreated(mapbox.MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
-    mapboxMap.loadStyleURI(mapbox.MapboxStyles.MAPBOX_STREETS);
-    // mapboxMap.setMapStyle(MapboxStyles.MAPBOX_STREETS);
-  }
-
-  void _showAddressConfirmationBottomSheet(dynamic address) {
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      context: context,
-      builder: (context) => AddressConfirmationSheet(
-        address: address,
-        onConfirm: _saveAddress,
-      ),
+    mapController.animateCamera(
+      CameraUpdate.newLatLngZoom(latLng, 16),
     );
   }
 
-  void _saveAddress(dynamic address) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConfirmLocationScreen(
-          coordinates: address['center'],
-          placeName: address['place_name'],
-        ),
-      ),
-    );
+  // Future<void> _getAddressFromLatLng(LatLng position) async {
+  //   try {
+  //     final url = Uri.parse(
+  //       'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$googleApiKey',
+  //     );
+
+  //     final response = await http.get(url);
+  //     final data = json.decode(response.body);
+
+  //     if (data['status'] == 'OK') {
+  //       print(data);
+  //       setState(() {
+  //         _currentPosition = position;
+  //         _selectedAddress = data['results'][0]['formatted_address'];
+  //         _markers = {
+  //           Marker(
+  //             markerId: MarkerId('selected_location'),
+  //             position: position,
+  //             infoWindow: InfoWindow(title: _selectedAddress),
+  //           ),
+  //         };
+  //       });
+  //     }
+  //   } catch (e) {
+  //     _showLocationError('Error getting address: $e');
+  //   }
+  // }
+
+  Future<void> _getAddressFromLatLng(LatLng position) async {
+    try {
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$googleApiKey',
+      );
+
+      final response = await http.get(url);
+      final data = json.decode(response.body);
+
+      if (data['status'] == 'OK') {
+        final result = data['results'][0];
+        final addressComponents = result['address_components'];
+        final plusCode = data['plus_code']?['compound_code'] ?? '';
+
+        // Create UserAddress object
+        final userAddress = UserAddress(
+          address: result['formatted_address'] ?? '',
+          street: result['formatted_address'] ?? '',
+          houseNumber: "",
+          state: "",
+          landmark: "",
+          plusCode: plusCode,
+          primary: false,
+          longitude: position.longitude,
+          latitude: position.latitude,
+        );
+
+        setState(() {
+          _currentPosition = position;
+          _selectedAddress = result['formatted_address'];
+          _markers = {
+            Marker(
+              markerId: MarkerId('selected_location'),
+              position: position,
+              infoWindow: InfoWindow(
+                title: _selectedAddress,
+              ),
+            ),
+          };
+
+          _userAddress = userAddress;
+        });
+
+        // You can now use userAddress object as needed
+        print('Parsed UserAddress: ${userAddress.toJson()}');
+      }
+    } catch (e) {
+      _showLocationError('Error getting address: $e');
+    }
   }
 
   void _useCurrentLocation() async {
@@ -277,43 +445,23 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
     });
 
     try {
-      final locationStatus = await _checkLocationPermission();
-      if (!locationStatus) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
-
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      mapboxMap?.flyTo(
-        mapbox.CameraOptions(
-          center: mapbox.Point(
-            coordinates: mapbox.Position(
-              position.longitude,
-              position.latitude,
-            ),
-          ),
-          zoom: 14,
-        ),
-        mapbox.MapAnimationOptions(duration: 1000),
+      final latLng = LatLng(position.latitude, position.longitude);
+
+      setState(() {
+        _currentPosition = latLng;
+      });
+
+      mapController.animateCamera(
+        CameraUpdate.newLatLngZoom(latLng, 16),
       );
 
-      final address = await mapboxService.reverseGeocode(
-        position.longitude,
-        position.latitude,
-      );
-
-      if (address != null) {
-        _showAddressConfirmationBottomSheet(address);
-      } else {
-        _showLocationError('Unable to fetch address for current location.');
-      }
+      await _getAddressFromLatLng(latLng);
     } catch (e) {
-      _showLocationError('Error fetching current location: $e');
+      _showLocationError('Error getting current location: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -321,111 +469,9 @@ class _ChooseAddressScreenState extends State<ChooseAddressScreen> {
     }
   }
 
-  Future<bool> _checkLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _showLocationError('Location services are disabled.');
-      return false;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _showLocationError('Location permissions are denied.');
-        return false;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      _showLocationError('Location permissions are permanently denied.');
-      return false;
-    }
-
-    return true;
-  }
-
   void _showLocationError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
-  }
-}
-
-class AddressConfirmationSheet extends StatelessWidget {
-  final dynamic address;
-  final Function(dynamic) onConfirm;
-
-  const AddressConfirmationSheet({
-    Key? key,
-    required this.address,
-    required this.onConfirm,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    print(address);
-    return Container(
-      // width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            address['place_name'],
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Coordinates: ${address['center'][0] ?? "..."} , ${address['center'][1] ?? ""}',
-            style: const TextStyle(
-                fontWeight: FontWeight.normal,
-                fontSize: 14,
-                color: AppColors.subTitleTextColor),
-          ),
-          const SizedBox(height: 20),
-          AppButton(
-            onPressed: () {
-              onConfirm(address);
-            },
-            label: 'Select this address',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MapboxService {
-  final String accessToken = dotenv.env['MAPBOX_ACCESS_TOKEN'] ?? '';
-  final String baseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
-
-  Future<List<dynamic>> getAutocompleteSuggestions(String query) async {
-    final String url =
-        'https://api.geoapify.com/v1/geocode/autocomplete?text=$query&filter=countrycode:ng&format=json&apiKey=31bac372636d457a86f44e3b9f8ccd03';
-    // '$baseUrl/$query.json?access_token=$accessToken&country=NG&limit=5';
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['results'];
-    } else {
-      throw Exception('Failed to load autocomplete suggestions');
-    }
-  }
-
-  Future<dynamic> reverseGeocode(double longitude, double latitude) async {
-    final String url =
-        '$baseUrl/$longitude,$latitude.json?access_token=$accessToken';
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['features'][0]; // Return the first result
-    } else {
-      return null;
-    }
   }
 }

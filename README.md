@@ -235,11 +235,10 @@ dependencies:
   
   # Network
   dio: ^5.4.0
-  connectivity_plus: ^5.0.2
   
   # Local Storage
   shared_preferences: ^2.2.2
-  isar: ^3.1.0
+  isar: ^3.1.0s
   isar_flutter_libs: ^3.1.0
   
   # UI Components

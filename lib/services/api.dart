@@ -16,6 +16,7 @@ class AuthClient extends http.BaseClient {
   final http.Client _inner;
   final FlutterSecureStorage _secureStorage;
   final String baseUrl;
+  String? _currentToken;
 
   AuthClient(this.baseUrl, this._secureStorage) : _inner = http.Client();
 
@@ -29,25 +30,52 @@ class AuthClient extends http.BaseClient {
 
     baseRequest.headers['Content-Type'] = 'application/json';
 
-    // Add auth token if available
-    final accessToken = await _secureStorage.read(key: 'access_token');
-    if (accessToken != null) {
-      baseRequest.headers['Authorization'] = 'Bearer $accessToken';
+    // Skip adding auth token for specific endpoints
+    if (!_shouldSkipAuthHeader(fullUrl)) {
+      final accessToken =
+          _currentToken ?? await _secureStorage.read(key: 'access_token');
+      if (accessToken != null) {
+        baseRequest.headers['Authorization'] = 'Bearer $accessToken';
+      }
     }
+
+    // // Add auth token if available
+    // final accessToken = await _secureStorage.read(key: 'access_token');
+    // if (accessToken != null) {
+    //   baseRequest.headers['Authorization'] = 'Bearer $accessToken';
+    // }
+
+    // if (_currentToken != null) {
+    //   baseRequest.headers['Authorization'] = 'Bearer $_currentToken';
+    // }
 
     try {
       // Send the request
       final response = await _inner.send(baseRequest);
 
       // Handle 401 errors and token refresh
-      if (accessToken != null && response.statusCode == 401) {
-        final newToken = await _refreshToken();
-        await _secureStorage.write(key: 'access_token', value: newToken);
+      // if (accessToken != null && response.statusCode == 401) {
+      //   final newToken = await _refreshToken();
+      //   await _secureStorage.write(key: 'access_token', value: newToken);
 
-        // Retry the original request with new token
-        final retryRequest = _copyRequest(request, Uri.parse(fullUrl));
-        retryRequest.headers['Authorization'] = 'Bearer $newToken';
-        return await _inner.send(retryRequest);
+      //   // Retry the original request with new token
+      //   final retryRequest = _copyRequest(request, Uri.parse(fullUrl));
+      //   retryRequest.headers['Authorization'] = 'Bearer $newToken';
+      //   return await _inner.send(retryRequest);
+      // }
+
+      if (response.statusCode == 401 && !_shouldSkipAuthHeader(fullUrl)) {
+        final newToken = await _refreshToken();
+        if (newToken != null) {
+          // Update current token and storage
+          _currentToken = newToken;
+          await _secureStorage.write(key: 'access_token', value: newToken);
+
+          // Retry the original request with new token
+          final retryRequest = _copyRequest(request, Uri.parse(fullUrl));
+          retryRequest.headers['Authorization'] = 'Bearer $newToken';
+          return await _inner.send(retryRequest);
+        }
       }
 
       return response;
@@ -59,6 +87,17 @@ class AuthClient extends http.BaseClient {
     }
   }
 
+  bool _shouldSkipAuthHeader(String url) {
+    final skipAuthEndpoints = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/verify',
+      '/auth/refresh',
+    ];
+
+    return skipAuthEndpoints.any((endpoint) => url.contains(endpoint));
+  }
+
   Future<String> _refreshToken() async {
     try {
       final refreshToken = await _secureStorage.read(key: 'refresh_token');
@@ -68,7 +107,7 @@ class AuthClient extends http.BaseClient {
       }
 
       final response = await http.post(
-        Uri.parse('$baseUrl/refresh'),
+        Uri.parse('$baseUrl/refresh/'),
         body: jsonEncode({'refresh_token': refreshToken}),
         headers: {'Content-Type': 'application/json'},
       );
@@ -102,6 +141,10 @@ class AuthClient extends http.BaseClient {
   Future<void> _forceLogout() async {
     await _secureStorage.deleteAll();
     // Add navigation logic to logout user
+  }
+
+  void updateToken(String newToken) {
+    _currentToken = newToken;
   }
 
   @override
@@ -142,6 +185,10 @@ class AuthClient extends http.BaseClient {
       request.headers['Authorization'] = 'Bearer $accessToken';
     }
 
+    if (_currentToken != null) {
+      request.headers['Authorization'] = 'Bearer $_currentToken';
+    }
+
     try {
       return await _inner.send(request);
     } catch (e) {
@@ -167,6 +214,10 @@ class AuthClient extends http.BaseClient {
     final accessToken = await _secureStorage.read(key: 'access_token');
     if (accessToken != null) {
       request.headers['Authorization'] = 'Bearer $accessToken';
+    }
+
+    if (_currentToken != null) {
+      request.headers['Authorization'] = 'Bearer $_currentToken';
     }
 
     print(request.files.first.field);
@@ -347,6 +398,12 @@ class ApiService {
     }
 
     throw ApiException(message);
+  }
+
+  void updateToken(String newToken) {
+    if (_client is AuthClient) {
+      (_client as AuthClient).updateToken(newToken);
+    }
   }
 
   void dispose() {

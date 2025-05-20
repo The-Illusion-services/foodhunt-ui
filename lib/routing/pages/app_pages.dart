@@ -13,6 +13,7 @@ import 'package:food_hunt/screens/app/store/unverified_dashboard/unverified_dash
 import 'package:food_hunt/screens/app/user/cart/single_store_cart.dart';
 import 'package:food_hunt/screens/app/user/favorites/favorites.dart';
 import 'package:food_hunt/screens/app/user/home/search.dart';
+import 'package:food_hunt/screens/app/user/profile/children/add_address/view/add_address.dart';
 // import 'package:food_hunt/screens/app/user/home/search_screen.dart';
 import 'package:food_hunt/screens/app/user/profile/children/password/view/change_password.dart';
 import 'package:food_hunt/screens/app/user/profile/children/profile_details/profile_details.dart';
@@ -27,12 +28,12 @@ import 'package:food_hunt/screens/auth/forgot_password/reset_password.dart';
 import 'package:food_hunt/screens/auth/forgot_password/verify_code.dart';
 import 'package:food_hunt/screens/auth/login/view/login.dart';
 import 'package:food_hunt/screens/auth/pre_login/pre_login.dart';
-import 'package:food_hunt/screens/auth/sign_up.dart';
+// import 'package:food_hunt/screens/auth/sign_up.dart';
 import 'package:food_hunt/screens/auth/verify_email/view/verify_email.dart';
 import 'package:food_hunt/screens/auth/verify_kyc/view/verify_kyc.dart';
 import 'package:food_hunt/screens/onboarding/onboarding.dart';
-import 'package:food_hunt/screens/app/user/profile/children/add_address/view/add_address.dart';
 import 'package:food_hunt/screens/select_location/choose_address.dart';
+import 'package:food_hunt/screens/select_location/confirm_location.dart';
 // import 'package:food_hunt/screens/select_location/confirm_location.dart';
 import 'package:food_hunt/screens/select_location/share_location.dart';
 
@@ -43,11 +44,13 @@ abstract class AppPages {
     AppRoute.preLoginScreen: (_) => PreLoginScreen(),
 
     // Auth
-    AppRoute.signUpScreen: (_) => const SignUpScreen(),
+    AppRoute.signUpScreen: (_) => const CreateUserAccountTypeScreen(),
     AppRoute.storeSignUpScreen: (_) => const CreateStoreAccountTypeScreen(),
     AppRoute.userSignUpScreen: (_) => const CreateUserAccountTypeScreen(),
     AppRoute.verifyEmailScreen: (_) => const VerifyEmailAddress(),
     AppRoute.shareLocationScreen: (_) => LocationScreen(),
+    // AppRoute.enterAddressScreen: (_) => ConfirmLocationScreen(),
+
     // AppRoute.confirmLocationScreen: (_) => MapConfirmationScreen(),
     AppRoute.chooseAddressScreen: (_) => ChooseAddressScreen(),
     AppRoute.addAddressScreen: (_) => AddAddressScreen(),

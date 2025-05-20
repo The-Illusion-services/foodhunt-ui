@@ -11,6 +11,7 @@ abstract class AppRoute {
   static const verifyEmailScreen = '/verify_email';
   static const shareLocationScreen = '/share_location';
   static const confirmLocationScreen = '/confirm_location';
+  static const enterAddressScreen = '/enter_address';
   static const chooseAddressScreen = '/address/choose';
   static const addAddressScreen = '/address/add';
 

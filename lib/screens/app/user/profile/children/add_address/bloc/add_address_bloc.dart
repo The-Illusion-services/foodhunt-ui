@@ -14,6 +14,10 @@ abstract class AddAddressEvent extends Equatable {
 
 class AddAddress extends AddAddressEvent {
   final String address;
+  final String houseNumber;
+  final String street;
+  final String landmark;
+  final String state;
   final String? label;
   final bool isPrimary;
   final dynamic longitude;
@@ -22,6 +26,10 @@ class AddAddress extends AddAddressEvent {
 
   const AddAddress(
       {required this.address,
+      required this.houseNumber,
+      required this.state,
+      required this.street,
+      required this.landmark,
       this.label,
       required this.isPrimary,
       required this.latitude,
@@ -29,8 +37,16 @@ class AddAddress extends AddAddressEvent {
       this.plusCode});
 
   @override
-  List<Object?> get props =>
-      [address, label, isPrimary, longitude, latitude, plusCode];
+  List<Object?> get props => [
+        address,
+        label,
+        isPrimary,
+        plusCode,
+        state,
+        street,
+        landmark,
+        houseNumber
+      ];
 }
 
 // State
@@ -77,21 +93,28 @@ class AddAddressBloc extends Bloc<AddAddressEvent, AddAddressState> {
 
     try {
       final address = await _authRepository.saveAddress(
-          address: event.address,
+          houseNumber: event.houseNumber,
+          street: event.street,
+          state: event.state,
+          landmark: event.landmark,
           label: event.label,
-          longitude: event.longitude,
-          latitude: event.latitude,
           isPrimary: event.isPrimary,
-          plusCode: event.plusCode);
+          plusCode: event.plusCode,
+          longitude: event.longitude,
+          latitude: event.latitude);
 
       final newAddress = UserAddress(
           id: address['id'],
           address: event.address,
+          houseNumber: event.houseNumber,
+          street: event.street,
+          state: event.state,
+          landmark: event.landmark,
           label: event.label,
-          longitude: event.longitude,
-          latitude: event.latitude,
           primary: event.isPrimary,
-          plusCode: event.plusCode);
+          plusCode: event.plusCode,
+          longitude: event.longitude,
+          latitude: event.latitude);
 
       await _addressService.addAddress(newAddress);
 

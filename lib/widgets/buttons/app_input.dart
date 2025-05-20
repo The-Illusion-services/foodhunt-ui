@@ -14,22 +14,24 @@ class AppInputField extends StatefulWidget {
   final Color textColor;
   final Color cursorColor;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
   final int? maxLength;
 
-  const AppInputField({
-    Key? key,
-    required this.label,
-    required this.hintText,
-    required this.controller,
-    this.maxLength,
-    this.keyboardType = TextInputType.text,
-    this.isPassword = false,
-    this.onChanged,
-    this.validator,
-    this.textColor = AppColors.bodyTextColor,
-    this.cursorColor = AppColors.placeHolderTextColor,
-    this.prefixIcon,
-  }) : super(key: key);
+  const AppInputField(
+      {Key? key,
+      required this.label,
+      required this.hintText,
+      required this.controller,
+      this.maxLength,
+      this.keyboardType = TextInputType.text,
+      this.isPassword = false,
+      this.onChanged,
+      this.validator,
+      this.textColor = AppColors.bodyTextColor,
+      this.cursorColor = AppColors.placeHolderTextColor,
+      this.prefixIcon,
+      this.suffixIcon})
+      : super(key: key);
 
   @override
   _AppInputFieldState createState() => _AppInputFieldState();
@@ -107,24 +109,26 @@ class _AppInputFieldState extends State<AppInputField> {
                   color: _hasError ? AppColors.error : widget.cursorColor,
                 ),
               ),
-              suffixIcon: widget.isPassword
-                  ? IconButton(
-                      icon: SvgPicture.string(
-                        _isObscure
-                            ? SvgIcons.closeEyeIcon
-                            : SvgIcons.openEyeIcon,
-                        width: 24,
-                        height: 24,
-                        colorFilter: ColorFilter.mode(
-                            Color(0xFF808080), BlendMode.srcIn),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isObscure = !_isObscure;
-                        });
-                      },
-                    )
-                  : null,
+              suffixIcon: widget.suffixIcon != null
+                  ? widget.suffixIcon
+                  : widget.isPassword
+                      ? IconButton(
+                          icon: SvgPicture.string(
+                            _isObscure
+                                ? SvgIcons.closeEyeIcon
+                                : SvgIcons.openEyeIcon,
+                            width: 24,
+                            height: 24,
+                            colorFilter: ColorFilter.mode(
+                                Color(0xFF808080), BlendMode.srcIn),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscure = !_isObscure;
+                            });
+                          },
+                        )
+                      : null,
               prefixIcon: widget.prefixIcon),
           style: TextStyle(
             fontFamily: 'SF_Pro',

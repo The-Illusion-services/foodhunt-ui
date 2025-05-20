@@ -102,7 +102,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 serviceFee: serviceFee,
                 total: total,
                 deliveryNotes: deliveryNotesController.text,
-                addressId: primaryAddress.id));
+                addressId: primaryAddress.id as int));
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -609,7 +609,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        primaryAddress.address,
+                        primaryAddress.houseNumber +
+                            ", " +
+                            primaryAddress.street,
+                        style: TextStyle(
+                          fontFamily: 'JK_Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.bodyTextColor,
+                        ),
+                      ),
+                      Text(
+                        "Landmark: " + primaryAddress.landmark,
                         style: TextStyle(
                           fontFamily: 'JK_Sans',
                           fontSize: 14,
@@ -936,7 +947,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     title: Text(
-                                      address.address,
+                                      address.houseNumber +
+                                          ", " +
+                                          address.street,
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: AppColors.bodyTextColor,

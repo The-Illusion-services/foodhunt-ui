@@ -8,6 +8,7 @@ import 'package:food_hunt/core/theme/app_colors.dart';
 import 'package:food_hunt/core/assets/app_assets.dart';
 import 'package:food_hunt/routing/routes/app_routes.dart';
 import 'package:food_hunt/screens/app/user/home/bloc/address_bloc.dart';
+import 'package:food_hunt/services/models/core/address.dart';
 import 'package:food_hunt/widgets/buttons/app_button.dart';
 import 'package:food_hunt/widgets/inputs/custom_search.dart';
 import 'package:food_hunt/screens/app/user/home/widgets/category.dart';
@@ -24,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   late final addresses;
-  String? selectedAddress;
+  UserAddress? selectedAddress;
 
   @override
   void initState() {
@@ -86,12 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       (address) => address.primary,
                       orElse: () => addresses.first,
                     );
-                    selectedAddress = primaryAddress.address;
+                    selectedAddress = primaryAddress;
                   } else {
-                    selectedAddress = "...";
+                    selectedAddress = null;
                   }
                 } else {
-                  selectedAddress = "...";
+                  selectedAddress = null;
                 }
 
                 return GestureDetector(
@@ -118,7 +119,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               Text(
-                                selectedAddress ?? "Add Address",
+                                selectedAddress != null
+                                    ? '${selectedAddress?.houseNumber}, ${selectedAddress!.street}'
+                                    : "Add Address",
                                 style: TextStyle(
                                   fontFamily: 'JK_Sans',
                                   fontSize: 12.0,
@@ -242,7 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                     TextButton.icon(
                       onPressed: () {
-                        Navigator.pushNamed(context, AppRoute.addAddressScreen);
+                        Navigator.pushNamed(
+                            context, AppRoute.chooseAddressScreen);
                       },
                       icon: Container(
                         width: 34,
@@ -307,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "No addresses found. Add an address  to continue",
                                 btnText: "Add Address", onTap: () {
                           Navigator.pushNamed(
-                              context, AppRoute.addAddressScreen);
+                              context, AppRoute.chooseAddressScreen);
                         }));
                       }
 
@@ -331,7 +335,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   title: Text(
-                                    address.address,
+                                    address.houseNumber +
+                                        ", " +
+                                        address.street +
+                                        ", " +
+                                        address.state,
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: AppColors.bodyTextColor,

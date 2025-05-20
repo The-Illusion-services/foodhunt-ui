@@ -83,7 +83,7 @@ class SavedAddressesScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, AppRoute.addAddressScreen);
+                Navigator.pushNamed(context, AppRoute.chooseAddressScreen);
               },
               icon: Container(
                 width: 34,

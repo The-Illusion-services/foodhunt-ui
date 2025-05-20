@@ -59,14 +59,23 @@ class UserAddressBloc extends Bloc<UserAddressEvent, UserAddressState> {
       FetchUserAddress event, Emitter<UserAddressState> emit) async {
     emit(UserAddressLoading());
     try {
+      print("SYART");
       final addresses = await _addressService.loadAddresses();
+      print("1");
 
       if (addresses.isNotEmpty) {
+        print("2");
+
         emit(UserAddressLoaded(addresses));
+        print("3");
       } else {
         // Otherwise, fetch addresses from the repository
         final addresses = await _authRepository.getUserAddresses();
+        print("4");
+
         await _addressService.addAddresses(addresses);
+        print("5");
+
         emit(UserAddressLoaded(addresses));
       }
     } catch (e) {

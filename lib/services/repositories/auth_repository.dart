@@ -7,10 +7,12 @@ import 'package:food_hunt/services/models/core/address.dart';
 import 'package:http/http.dart' as http;
 import 'package:food_hunt/core/utils/auth_service_helper.dart';
 import 'package:food_hunt/services/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository {
   final ApiService _apiService;
   final FlutterSecureStorage _storage;
+
   final AuthService authService = AuthService();
 
   AuthRepository(this._apiService, this._storage);
@@ -45,6 +47,8 @@ class AuthRepository {
       await authService.setVerificationStatus(response['is_verified']);
 
       await authService.setHasRestaurantProfile(response['has_restaurant']);
+
+      _apiService.updateToken(response['access_token']);
 
       return response;
     } catch (e) {
@@ -93,6 +97,8 @@ class AuthRepository {
 
       await authService.setHasRestaurantProfile(false);
 
+      _apiService.updateToken(response['access_token']);
+
       return response;
     } catch (e) {
       throw e.toString();
@@ -100,8 +106,10 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     await _storage.deleteAll();
     await authService.clearAuthData();
+    await preferences.clear();
   }
 
   Future<Map<String, dynamic>> createStore({
@@ -330,22 +338,26 @@ class AuthRepository {
     }
   }
 
-  Future<Map<String, dynamic>> saveAddress({
-    required String address,
-    required dynamic longitude,
-    required dynamic latitude,
-    String? label,
-    required bool isPrimary,
-    String? plusCode,
-  }) async {
+  Future<Map<String, dynamic>> saveAddress(
+      {required String houseNumber,
+      required String street,
+      required String landmark,
+      required String state,
+      String? label,
+      required bool isPrimary,
+      String? plusCode,
+      dynamic longitude,
+      dynamic latitude}) async {
     try {
       final response = await _apiService.post('/auth/address/', data: {
-        "address": address,
+        "house_number": houseNumber,
+        "state": state,
+        "street": street,
+        "landmark": landmark,
         "primary": isPrimary,
         "label": label,
-        'longitude': longitude.toString(),
-        'latitude': latitude.toString(),
-        'plus_code': plusCode
+        'longitude': longitude,
+        "latitude": latitude
       });
 
       print(response['data']['details']);

@@ -1,9 +1,7 @@
-// screens/store_cart_screen.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-// import 'package:food_hunt/core/assets/app_assets.dart';
 import 'package:food_hunt/core/assets/svg.dart';
 import 'package:food_hunt/core/config/enums.dart';
 import 'package:food_hunt/core/constants/app_constants.dart';
@@ -117,122 +115,126 @@ class StoreCartScreen extends StatelessWidget {
 
           return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0)
-                  .copyWith(top: 24.0), // Add horizontal padding and top margin
+                  .copyWith(top: 24.0),
               child: ListView.builder(
                 itemCount: currentStoreCart.items.length,
                 itemBuilder: (context, index) {
                   final cartItem = currentStoreCart.items[index];
-                  return Dismissible(
-                    key: Key(cartItem.foodItem.id),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerRight,
-                      child: const Padding(
-                        padding: EdgeInsets.only(right: 16.0),
-                        child: Icon(Icons.delete, color: Colors.white),
-                      ),
-                    ),
-                    onDismissed: (_) {
-                      context
-                          .read<CartBloc>()
-                          .add(RemoveFromCart(cartItem.foodItem.id));
-                    },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            cartItem.foodItem.dishImage ?? "",
-                            width: 64,
-                            height: 64,
-                            fit: BoxFit.cover,
+                  return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Dismissible(
+                        key: Key(cartItem.foodItem.id),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: const Color.fromARGB(255, 211, 39, 26),
+                          alignment: Alignment.centerRight,
+                          child: const Padding(
+                            padding: EdgeInsets.only(right: 16.0),
+                            child: Icon(Icons.delete, color: Colors.white),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cartItem.foodItem.name,
-                                style: TextStyle(
-                                    fontFamily: "JK_Sans",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.bodyTextColor),
-                              ),
-                              // const SizedBox(height: 4),
-                              Text(cartItem.foodItem.description ?? '',
-                                  // "Lorem ipsum dolor sit amet consectetur. Arcu sit mi aliquam nunc justo. Urna ut congue nulla quis id facilisis.",
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.subTitleTextColor),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
-                              const SizedBox(height: 4),
-                              Text(
-                                '$naira${cartItem.foodItem.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                    fontFamily: "JK_Sans",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.bodyTextColor),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Quantity adjuster
-                        Row(
+                        onDismissed: (_) {
+                          context
+                              .read<CartBloc>()
+                              .add(RemoveFromCart(cartItem.foodItem.id));
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.remove_circle_outline,
-                                color: AppColors.grayTextColor,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                cartItem.foodItem.dishImage ?? "",
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
                               ),
-                              onPressed: () {
-                                if (cartItem.quantity > 1) {
-                                  context.read<CartBloc>().add(
-                                      DecrementQuantity(cartItem.foodItem.id));
-                                } else {
-                                  context.read<CartBloc>().add(
-                                      RemoveFromCart(cartItem.foodItem.id));
-                                }
-                              },
                             ),
-                            Text(cartItem.quantity.toString()),
-                            IconButton(
-                              icon: Icon(
-                                Icons.add_circle_outline,
-                                color: AppColors.grayTextColor,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cartItem.foodItem.name,
+                                    style: TextStyle(
+                                        fontFamily: "JK_Sans",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.bodyTextColor),
+                                  ),
+                                  // const SizedBox(height: 4),
+                                  Text(cartItem.foodItem.description ?? '',
+                                      // "Lorem ipsum dolor sit amet consectetur. Arcu sit mi aliquam nunc justo. Urna ut congue nulla quis id facilisis.",
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColors.subTitleTextColor),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '$naira${cartItem.foodItem.price.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                        fontFamily: "JK_Sans",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColors.bodyTextColor),
+                                  ),
+                                ],
                               ),
-                              onPressed: () {
-                                context.read<CartBloc>().add(
-                                      AddToCart(
-                                        FoodItem(
-                                            id: cartItem.foodItem.id,
-                                            name: cartItem.foodItem.name,
-                                            price: cartItem.foodItem.price,
-                                            storeId: cartItem.foodItem.storeId,
-                                            storeName:
-                                                cartItem.foodItem.storeName,
-                                            storeLogo:
-                                                cartItem.foodItem.storeLogo,
-                                            dishImage:
-                                                cartItem.foodItem.dishImage,
-                                            description:
-                                                cartItem.foodItem.description),
-                                      ),
-                                    );
-                              },
+                            ),
+                            // Quantity adjuster
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.remove_circle_outline,
+                                    color: AppColors.grayTextColor,
+                                  ),
+                                  onPressed: () {
+                                    if (cartItem.quantity > 1) {
+                                      context.read<CartBloc>().add(
+                                          DecrementQuantity(
+                                              cartItem.foodItem.id));
+                                    } else {
+                                      context.read<CartBloc>().add(
+                                          RemoveFromCart(cartItem.foodItem.id));
+                                    }
+                                  },
+                                ),
+                                Text(cartItem.quantity.toString()),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.add_circle_outline,
+                                    color: AppColors.grayTextColor,
+                                  ),
+                                  onPressed: () {
+                                    context.read<CartBloc>().add(
+                                          AddToCart(
+                                            FoodItem(
+                                                id: cartItem.foodItem.id,
+                                                name: cartItem.foodItem.name,
+                                                price: cartItem.foodItem.price,
+                                                storeId:
+                                                    cartItem.foodItem.storeId,
+                                                storeName:
+                                                    cartItem.foodItem.storeName,
+                                                storeLogo:
+                                                    cartItem.foodItem.storeLogo,
+                                                dishImage:
+                                                    cartItem.foodItem.dishImage,
+                                                description: cartItem
+                                                    .foodItem.description),
+                                          ),
+                                        );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
+                      ));
                 },
               ));
         }

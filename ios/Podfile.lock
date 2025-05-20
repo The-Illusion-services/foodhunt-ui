@@ -5,9 +5,6 @@ PODS:
   - AppAuth/Core (1.7.5)
   - AppAuth/ExternalUserAgent (1.7.5):
     - AppAuth/Core
-  - connectivity_plus (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - Flutter (1.0.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
@@ -34,6 +31,7 @@ PODS:
   - GoogleMaps/Base (8.4.0)
   - GoogleMaps/Maps (8.4.0):
     - GoogleMaps/Base
+  - GooglePlaces (8.5.0)
   - GoogleSignIn (7.1.0):
     - AppAuth (< 2.0, >= 1.7.3)
     - GTMAppAuth (< 5.0, >= 4.1.1)
@@ -94,7 +92,6 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
-  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - Flutter (from `Flutter`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
@@ -102,6 +99,8 @@ DEPENDENCIES:
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
+  - GoogleMaps
+  - GooglePlaces
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - libphonenumber_plugin (from `.symlinks/plugins/libphonenumber_plugin/ios`)
@@ -120,6 +119,7 @@ SPEC REPOS:
     - AppAuth
     - Google-Maps-iOS-Utils
     - GoogleMaps
+    - GooglePlaces
     - GoogleSignIn
     - GTMAppAuth
     - GTMSessionFetcher
@@ -131,8 +131,6 @@ SPEC REPOS:
     - Turf
 
 EXTERNAL SOURCES:
-  connectivity_plus:
-    :path: ".symlinks/plugins/connectivity_plus/darwin"
   Flutter:
     :path: Flutter
   flutter_keyboard_visibility:
@@ -172,7 +170,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
-  connectivity_plus: 18382e7311ba19efcaee94442b23b32507b20695
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_native_splash: f71420956eb811e6d310720fee915f1d42852e7a
@@ -182,6 +179,7 @@ SPEC CHECKSUMS:
   google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
   google_sign_in_ios: 4111e87aa5e24a4404f00ea13479f35e571969cc
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
+  GooglePlaces: 426efb69051e7b460e16300ba63598687d10fa1a
   GoogleSignIn: d4281ab6cf21542b1cfaff85c191f230b399d2db
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
@@ -203,6 +201,6 @@ SPEC CHECKSUMS:
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
   webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
 
-PODFILE CHECKSUM: 01ded91101bd24fd2a493cfee2963ab732dba169
+PODFILE CHECKSUM: 37ab945bd2e3b54ff56a4d279f9d73a497747fef
 
 COCOAPODS: 1.14.3

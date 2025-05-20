@@ -1,0 +1,2 @@
+/Users/Ophelia/Desktop/foodhunt-ui/android/app/.cxx/RelWithDebInfo/r2a3z1u4/x86/CMakeFiles/edit_cache.dir
+/Users/Ophelia/Desktop/foodhunt-ui/android/app/.cxx/RelWithDebInfo/r2a3z1u4/x86/CMakeFiles/rebuild_cache.dir

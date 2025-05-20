@@ -1,0 +1,1 @@
+/Users/Ophelia/Desktop/foodhunt-ui/build/app/intermediates/cxx/RelWithDebInfo/r2a3z1u4/obj/arm64-v8a

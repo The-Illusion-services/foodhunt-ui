@@ -19,18 +19,28 @@ class AddressService {
 
   // Load addresses from SharedPreferences
   Future<List<UserAddress>> loadAddresses() async {
+    print("a");
     final prefs = await SharedPreferences.getInstance();
+    print("b");
+
     final addressesString = prefs.getString(_addressKey);
 
+    print("c");
+
     if (addressesString != null) {
-      // Decode JSON and convert to List<UserAddress>
+      print("d");
+      print(addressesString);
+
       final addressesJson = json.decode(addressesString) as List;
+      print(addressesJson);
       final addresses =
           addressesJson.map((json) => UserAddress.fromJson(json)).toList();
+      print("e");
+
       return addresses;
     }
 
-    return []; // Return an empty list if no addresses are found
+    return [];
   }
 
   // Get the primary address
